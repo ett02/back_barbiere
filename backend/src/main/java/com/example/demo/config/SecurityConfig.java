@@ -19,7 +19,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity
+@EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
     @Autowired
@@ -37,9 +37,11 @@ public class SecurityConfig {
                 .requestMatchers("/auth/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/services/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/barbers/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/business-hours/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/barbers/**").hasAnyAuthority("ADMIN", "ROLE_ADMIN")
                 .requestMatchers(HttpMethod.PUT, "/barbers/**").hasAnyAuthority("ADMIN", "ROLE_ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/barbers/**").hasAnyAuthority("ADMIN", "ROLE_ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/business-hours/**").hasAnyAuthority("ADMIN", "ROLE_ADMIN")
                 .requestMatchers(HttpMethod.GET, "/appointments/available-slots").permitAll()
                 .anyRequest().authenticated()
             )
