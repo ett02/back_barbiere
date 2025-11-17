@@ -23,6 +23,7 @@ export class CustomerDashboardComponent implements OnInit {
   customerName = 'Cliente';
   appointments: Appointment[] = [];
   waitingList: WaitingList[] = [];
+  selectedFilter: 'UPCOMING' | 'CANCELED' | 'PAST' = 'UPCOMING';
 
   ngOnInit(): void {
     // Get customer name from JWT token
@@ -147,5 +148,60 @@ export class CustomerDashboardComponent implements OnInit {
   logout(): void {
     this.authService.logout();
     this.router.navigate(['/login']);
+  }
+
+  setFilter(filter: 'UPCOMING' | 'CANCELED' | 'PAST'): void {
+    this.selectedFilter = filter;
+  }
+
+  isUpcoming(appointment: Appointment): boolean {
+    if (appointment.stato !== 'CONFERMATO') {
+      return false;
+    }
+    const dateTime = this.getAppointmentDateTime(appointment);
+    return !!dateTime && dateTime >= new Date();
+  }
+
+  get filteredAppointments(): Appointment[] {
+    return this.appointments.filter((appointment) => {
+      const dateTime = this.getAppointmentDateTime(appointment);
+      switch (this.selectedFilter) {
+        case 'UPCOMING':
+          return this.isUpcoming(appointment);
+        case 'CANCELED':
+          return appointment.stato === 'ANNULLATO';
+        case 'PAST':
+          return appointment.stato !== 'ANNULLATO' && !!dateTime && dateTime < new Date();
+        default:
+          return false;
+      }
+    });
+  }
+
+  getCurrentFilterMessage(): string {
+    switch (this.selectedFilter) {
+      case 'UPCOMING':
+        return 'Mostro solo gli appuntamenti confermati da svolgere';
+      case 'CANCELED':
+        return 'Mostro gli appuntamenti annullati';
+      case 'PAST':
+        return 'Mostro gli appuntamenti già passati';
+      default:
+        return '';
+    }
+  }
+
+  private getAppointmentDateTime(appointment: Appointment): Date | null {
+    const datePart =
+      appointment.data instanceof Date
+        ? appointment.data.toISOString().split('T')[0]
+        : appointment.data;
+
+    if (!datePart || !appointment.orarioInizio) {
+      return null;
+    }
+
+    const parsedDate = new Date(`${datePart}T${appointment.orarioInizio}`);
+    return isNaN(parsedDate.getTime()) ? null : parsedDate;
   }
 }

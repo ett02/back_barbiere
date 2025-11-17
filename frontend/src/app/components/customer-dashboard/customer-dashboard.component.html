@@ -22,42 +22,85 @@
   </section>
 
   <!-- I Miei Appuntamenti -->
-  <section class="appointments-section" *ngIf="appointments.length > 0">
-    <h2>📋 I Miei Appuntamenti</h2>
-    <div class="appointments-grid">
-      <div class="appointment-card" *ngFor="let appointment of appointments">
-        <div class="appointment-header">
-          <span class="service-name">{{ getServiceName(appointment.service) }}</span>
-          <span class="status-badge" [class]="getAppointmentStatusClass(appointment)">
-            {{ appointment.stato || 'PENDING' }}
-          </span>
-        </div>
-        <div class="appointment-details">
-          <p><strong>Barbiere:</strong> {{ getBarberFullName(appointment.barber) }}</p>
-          <p><strong>Data:</strong> {{ appointment.data | date: 'dd/MM/yyyy' }}</p>
-          <p><strong>Orario:</strong> {{ appointment.orarioInizio }}</p>
-          <p><strong>Durata:</strong> {{ getServiceDuration(appointment.service) }}</p>
-        </div>
+  <section class="appointments-section" *ngIf="appointments.length > 0; else noAppointments">
+    <div class="appointments-header">
+      <h2>📋 I Miei Appuntamenti</h2>
+      <div class="filter-tabs" role="group" aria-label="Filtra appuntamenti">
         <button
-          class="btn btn-secondary btn-cancel"
-          *ngIf="appointment.stato === 'CONFERMATO'"
-          (click)="cancelAppointment(appointment.id)"
+          type="button"
+          class="filter-chip"
+          [class.active]="selectedFilter === 'UPCOMING'"
+          (click)="setFilter('UPCOMING')"
         >
-          ❌ Cancella Appuntamento
+          Da fare
+        </button>
+        <button
+          type="button"
+          class="filter-chip"
+          [class.active]="selectedFilter === 'CANCELED'"
+          (click)="setFilter('CANCELED')"
+        >
+          Annullati
+        </button>
+        <button
+          type="button"
+          class="filter-chip"
+          [class.active]="selectedFilter === 'PAST'"
+          (click)="setFilter('PAST')"
+        >
+          Passati
         </button>
       </div>
     </div>
+    <p class="filter-helper">{{ getCurrentFilterMessage() }}</p>
+
+    <ng-container *ngIf="filteredAppointments.length > 0; else emptyFiltered">
+      <div class="appointments-grid">
+        <div class="appointment-card" *ngFor="let appointment of filteredAppointments">
+          <div class="appointment-header">
+            <span class="service-name">{{ getServiceName(appointment.service) }}</span>
+            <span class="status-badge" [class]="getAppointmentStatusClass(appointment)">
+              {{ appointment.stato || 'PENDING' }}
+            </span>
+          </div>
+          <div class="appointment-details">
+            <p><strong>Barbiere:</strong> {{ getBarberFullName(appointment.barber) }}</p>
+            <p><strong>Data:</strong> {{ appointment.data | date: 'dd/MM/yyyy' }}</p>
+            <p><strong>Orario:</strong> {{ appointment.orarioInizio }}</p>
+            <p><strong>Durata:</strong> {{ getServiceDuration(appointment.service) }}</p>
+          </div>
+          <button
+            class="btn btn-secondary btn-cancel"
+            *ngIf="isUpcoming(appointment)"
+            (click)="cancelAppointment(appointment.id)"
+          >
+            ❌ Cancella Appuntamento
+          </button>
+        </div>
+      </div>
+    </ng-container>
   </section>
 
-  <!-- Messaggio se nessun appuntamento -->
-  <section class="no-appointments" *ngIf="appointments.length === 0">
-    <div class="empty-state">
-      <span class="empty-icon">📅</span>
-      <h3>Nessun Appuntamento</h3>
-      <p>Non hai ancora prenotato nessun servizio. Prenota ora per il tuo taglio perfetto!</p>
-      <button class="btn btn-primary" (click)="navigateToBooking()">✂️ Prenota Subito</button>
+  <ng-template #emptyFiltered>
+    <div class="no-results">
+      <span class="empty-icon">📂</span>
+      <p *ngIf="selectedFilter === 'UPCOMING'">Non hai appuntamenti confermati da fare.</p>
+      <p *ngIf="selectedFilter === 'CANCELED'">Non ci sono appuntamenti annullati.</p>
+      <p *ngIf="selectedFilter === 'PAST'">Non ci sono appuntamenti passati da mostrare.</p>
     </div>
-  </section>
+  </ng-template>
+
+  <!-- Messaggio se nessun appuntamento in assoluto -->
+  <ng-template #noAppointments>
+    <section class="no-appointments">
+      <div class="empty-state">
+        <span class="empty-icon">📅</span>
+        <h3>Nessun Appuntamento</h3>
+        <p>Non hai ancora prenotato nessun servizio. Prenota ora per il tuo taglio perfetto!</p>
+        <button class="btn btn-primary" (click)="navigateToBooking()">✂️ Prenota Subito</button>
+      </div>
+    </section>
+  </ng-template>
 
   <!-- Lista d'Attesa -->
   <section class="waiting-list-section" *ngIf="waitingList.length > 0">
