@@ -1,4 +1,4 @@
-# Progetto Barberia - Frontend
+# Progetto Barberia 
 
 Benvenuto nel frontend del progetto Barberia! Questa applicazione è stata sviluppata con [Angular CLI](https://github.com/angular/angular-cli) e si interfaccia con un backend dedicato per fornire una soluzione completa per la gestione di un salone da barbiere.
 
