@@ -12,6 +12,13 @@ import { HttpErrorResponse } from '@angular/common/http';
 
 type AdminSection = 'services' | 'barbers' | 'agenda' | 'settings';
 
+type CalendarDay = {
+  date: Date;
+  inMonth: boolean;
+  isToday: boolean;
+  isSelected: boolean;
+};
+
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
@@ -31,6 +38,10 @@ export class AdminDashboardComponent implements OnInit {
 
   selectedSection: AdminSection = 'agenda';
   selectedDate = '';
+  calendarDays: CalendarDay[] = [];
+  calendarWeekdays = ['Lu', 'Ma', 'Me', 'Gi', 'Ve', 'Sa', 'Do'];
+  calendarMonthLabel = '';
+  private calendarReference: Date = new Date();
 
   newService: Partial<Service> = {
     nome: '',
@@ -83,8 +94,9 @@ export class AdminDashboardComponent implements OnInit {
 
   private initializeAgenda(): void {
     const today = new Date();
-    this.selectedDate = today.toISOString().split('T')[0];
+    this.selectedDate = this.formatDateForInput(today);
     this.loadAppointmentsForDate();
+    this.updateCalendar(today);
   }
 
   loadServices(): void {
@@ -273,6 +285,113 @@ export class AdminDashboardComponent implements OnInit {
 
   onAgendaDateChange(): void {
     this.loadAppointmentsForDate();
+    this.updateCalendar();
+  }
+
+  setToday(): void {
+    const today = new Date();
+    this.selectedDate = this.formatDateForInput(today);
+    this.onAgendaDateChange();
+    this.updateCalendar(today);
+  }
+
+  selectCalendarDay(day: CalendarDay): void {
+    this.selectedDate = this.formatDateForInput(day.date);
+    this.onAgendaDateChange();
+    this.updateCalendar(day.date);
+  }
+
+  goToPrevMonth(): void {
+    const ref = this.getCalendarReferenceDate();
+    const prevMonth = new Date(ref.getFullYear(), ref.getMonth() - 1, 1);
+    this.updateCalendar(prevMonth);
+  }
+
+  goToNextMonth(): void {
+    const ref = this.getCalendarReferenceDate();
+    const nextMonth = new Date(ref.getFullYear(), ref.getMonth() + 1, 1);
+    this.updateCalendar(nextMonth);
+  }
+
+  private getCalendarReferenceDate(): Date {
+    return new Date(this.calendarReference.getFullYear(), this.calendarReference.getMonth(), 1);
+  }
+
+  private updateCalendar(reference?: Date): void {
+    const base = reference ?? this.parseInputDate(this.selectedDate) ?? new Date();
+    const startOfMonth = new Date(base.getFullYear(), base.getMonth(), 1);
+    const selected = this.parseInputDate(this.selectedDate);
+    const today = new Date();
+
+    const startOffset = (startOfMonth.getDay() + 6) % 7; // Monday-first offset
+    const daysInMonth = new Date(base.getFullYear(), base.getMonth() + 1, 0).getDate();
+    const daysInPrevMonth = new Date(base.getFullYear(), base.getMonth(), 0).getDate();
+
+    const days: CalendarDay[] = [];
+
+    // Leading days from previous month
+    for (let i = startOffset - 1; i >= 0; i -= 1) {
+      const date = new Date(base.getFullYear(), base.getMonth() - 1, daysInPrevMonth - i);
+      days.push({
+        date,
+        inMonth: false,
+        isToday: this.isSameDay(date, today),
+        isSelected: selected ? this.isSameDay(date, selected) : false,
+      });
+    }
+
+    // Current month days
+    for (let day = 1; day <= daysInMonth; day += 1) {
+      const date = new Date(base.getFullYear(), base.getMonth(), day);
+      days.push({
+        date,
+        inMonth: true,
+        isToday: this.isSameDay(date, today),
+        isSelected: selected ? this.isSameDay(date, selected) : false,
+      });
+    }
+
+    // Trailing days to complete the last week
+    const remaining = days.length % 7 === 0 ? 0 : 7 - (days.length % 7);
+    for (let i = 1; i <= remaining; i += 1) {
+      const date = new Date(base.getFullYear(), base.getMonth() + 1, i);
+      days.push({
+        date,
+        inMonth: false,
+        isToday: this.isSameDay(date, today),
+        isSelected: selected ? this.isSameDay(date, selected) : false,
+      });
+    }
+
+    this.calendarReference = startOfMonth;
+    this.calendarMonthLabel = startOfMonth.toLocaleString('it-IT', {
+      month: 'long',
+      year: 'numeric',
+    });
+    this.calendarDays = days;
+  }
+
+  private isSameDay(a: Date, b: Date): boolean {
+    return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+  }
+
+  private formatDateForInput(date: Date): string {
+    const year = date.getFullYear();
+    const month = `${date.getMonth() + 1}`.padStart(2, '0');
+    const day = `${date.getDate()}`.padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  private parseInputDate(value: string): Date | null {
+    if (!value) {
+      return null;
+    }
+    const [year, month, day] = value.split('-').map((part) => Number(part));
+    if (!year || !month || !day) {
+      return null;
+    }
+    const date = new Date(year, month - 1, day);
+    return Number.isNaN(date.getTime()) ? null : date;
   }
 
   private formatTimeValue(time: string): string {
