@@ -5,7 +5,6 @@ import com.example.demo.dto.AvailableSlotResponse;
 import com.example.demo.model.*;
 import com.example.demo.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,9 +30,6 @@ public class AppointmentsService {
 
     @Autowired
     private ServicesRepository servicesRepository;
-
-    @Autowired
-    private AvailabilityRepository availabilityRepository;
 
     @Autowired
     private WaitingListRepository waitingListRepository;
@@ -205,12 +201,6 @@ public class AppointmentsService {
             return slots;
         }
 
-        List<Availability> availabilities = availabilityRepository.findByBarberIdAndGiorno(barberId, dayOfWeek);
-
-        if (availabilities.isEmpty()) {
-            return slots;
-        }
-
         Services service = servicesRepository.findById(serviceId)
                 .orElseThrow(() -> new RuntimeException("Servizio non trovato"));
 
@@ -219,35 +209,22 @@ public class AppointmentsService {
             return slots;
         }
 
-        LocalTime apertura = businessHours != null ? businessHours.getApertura() : null;
-        LocalTime chiusura = businessHours != null ? businessHours.getChiusura() : null;
+        LocalTime apertura = businessHours.getApertura();
+        LocalTime chiusura = businessHours.getChiusura();
 
-        for (Availability availability : availabilities) {
-            LocalTime effectiveStart = availability.getOrarioInizio();
-            LocalTime effectiveEnd = availability.getOrarioFine();
+        if (apertura == null || chiusura == null || !apertura.isBefore(chiusura)) {
+            return slots;
+        }
 
-            if (apertura != null && effectiveStart.isBefore(apertura)) {
-                effectiveStart = apertura;
-            }
+        LocalTime currentTime = apertura;
 
-            if (chiusura != null && effectiveEnd.isAfter(chiusura)) {
-                effectiveEnd = chiusura;
-            }
+        while (!currentTime.plusMinutes(serviceDuration).isAfter(chiusura)) {
+            LocalTime slotEnd = currentTime.plusMinutes(serviceDuration);
+            boolean available = isSlotAvailable(barberId, date, currentTime, serviceId);
 
-            if (!effectiveStart.isBefore(effectiveEnd)) {
-                continue;
-            }
+            slots.add(new AvailableSlotResponse(currentTime, slotEnd, available));
 
-            LocalTime currentTime = effectiveStart;
-
-            while (!currentTime.plusMinutes(serviceDuration).isAfter(effectiveEnd)) {
-                LocalTime slotEnd = currentTime.plusMinutes(serviceDuration);
-                boolean available = isSlotAvailable(barberId, date, currentTime, serviceId);
-
-                slots.add(new AvailableSlotResponse(currentTime, slotEnd, available));
-
-                currentTime = currentTime.plusMinutes(serviceDuration);
-            }
+            currentTime = currentTime.plusMinutes(serviceDuration);
         }
 
         slots.sort(Comparator.comparing(AvailableSlotResponse::getOrarioInizio));
