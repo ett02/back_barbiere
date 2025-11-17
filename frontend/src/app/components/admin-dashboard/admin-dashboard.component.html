@@ -303,13 +303,41 @@
       <div class="panel-body">
         <div class="agenda-controls">
           <label for="agenda-date">Seleziona una data</label>
-          <input
-            id="agenda-date"
-            type="date"
-            [(ngModel)]="selectedDate"
-            name="agenda_date"
-            (change)="onAgendaDateChange()"
-          />
+          <div class="date-picker">
+            <input
+              id="agenda-date"
+              type="date"
+              [(ngModel)]="selectedDate"
+              name="agenda_date"
+              (change)="onAgendaDateChange()"
+            />
+            <button type="button" class="btn ghost today-btn" (click)="setToday()">Oggi</button>
+          </div>
+          <p class="date-hint">Scegli un giorno per vedere gli appuntamenti confermati in agenda.</p>
+
+          <div class="mini-calendar" aria-label="Calendario appuntamenti">
+            <div class="calendar-header">
+              <button type="button" class="nav" (click)="goToPrevMonth()" aria-label="Mese precedente">◀</button>
+              <div class="month-label">{{ calendarMonthLabel }}</div>
+              <button type="button" class="nav" (click)="goToNextMonth()" aria-label="Mese successivo">▶</button>
+            </div>
+            <div class="calendar-weekdays">
+              <span class="weekday" *ngFor="let day of calendarWeekdays">{{ day }}</span>
+            </div>
+            <div class="calendar-grid">
+              <button
+                type="button"
+                class="day"
+                *ngFor="let day of calendarDays"
+                [class.outside]="!day.inMonth"
+                [class.today]="day.isToday"
+                [class.selected]="day.isSelected"
+                (click)="selectCalendarDay(day)"
+              >
+                {{ day.date.getDate() }}
+              </button>
+            </div>
+          </div>
         </div>
 
         <div *ngIf="appointments.length > 0; else emptyAppointments" class="appointments-grid">
