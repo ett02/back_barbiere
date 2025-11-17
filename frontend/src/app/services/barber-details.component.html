@@ -1,0 +1,35 @@
+<div *ngIf="isLoading">
+  <p>Caricamento...</p>
+</div>
+
+<div *ngIf="error">
+  <p class="error-message">{{ error }}</p>
+</div>
+
+<div *ngIf="!isLoading && barber">
+  <h2>Gestione Servizi per {{ barber.nome }} {{ barber.cognome }}</h2>
+
+  <div class="card">
+    <div class="card-body">
+      <h5 class="card-title">Seleziona i servizi erogati</h5>
+      <p class="card-text">Scegli quali servizi questo barbiere può offrire ai clienti.</p>
+
+      <div class="form-group">
+        <div *ngFor="let service of allServices" class="form-check">
+          <input
+            class="form-check-input"
+            type="checkbox"
+            [id]="'service-' + service.id"
+            [checked]="selectedServiceIds.has(service.id)"
+            (change)="onServiceChange(service.id, $event)"
+          />
+          <label class="form-check-label" [for]="'service-' + service.id">
+            {{ service.nome }} ({{ service.prezzo | currency:'EUR' }})
+          </label>
+        </div>
+      </div>
+
+      <button (click)="saveBarberServices()" class="btn btn-primary mt-3">Salva Modifiche</button>
+    </div>
+  </div>
+</div>

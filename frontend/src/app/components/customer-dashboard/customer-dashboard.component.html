@@ -1,0 +1,128 @@
+<div class="dashboard-container">
+  <header class="dashboard-header">
+    <div class="dashboard-user">
+      <span class="user-icon">👤</span>
+      <span class="user-name">{{ customerName }}</span>
+    </div>
+    <button class="btn btn-secondary logout-button" (click)="logout()">
+      🚪 Logout
+    </button>
+  </header>
+  <!-- Hero Section con Benvenuto -->
+  <section class="hero-section">
+    <div class="hero-content">
+      <h1 class="welcome-title">💈 Benvenuto, {{ customerName }}!</h1>
+      <p class="welcome-subtitle">
+        Prenota il tuo taglio perfetto con i migliori barbieri della città
+      </p>
+      <button class="btn btn-primary btn-large" (click)="navigateToBooking()">
+        📅 Prenota Ora
+      </button>
+    </div>
+  </section>
+
+  <!-- I Miei Appuntamenti -->
+  <section class="appointments-section" *ngIf="appointments.length > 0">
+    <h2>📋 I Miei Appuntamenti</h2>
+    <div class="appointments-grid">
+      <div class="appointment-card" *ngFor="let appointment of appointments">
+        <div class="appointment-header">
+          <span class="service-name">{{ getServiceName(appointment.service) }}</span>
+          <span class="status-badge" [class]="getAppointmentStatusClass(appointment)">
+            {{ appointment.stato || 'PENDING' }}
+          </span>
+        </div>
+        <div class="appointment-details">
+          <p><strong>Barbiere:</strong> {{ getBarberFullName(appointment.barber) }}</p>
+          <p><strong>Data:</strong> {{ appointment.data | date: 'dd/MM/yyyy' }}</p>
+          <p><strong>Orario:</strong> {{ appointment.orarioInizio }}</p>
+          <p><strong>Durata:</strong> {{ getServiceDuration(appointment.service) }}</p>
+        </div>
+        <button
+          class="btn btn-secondary btn-cancel"
+          *ngIf="appointment.stato === 'CONFERMATO'"
+          (click)="cancelAppointment(appointment.id)"
+        >
+          ❌ Cancella Appuntamento
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Messaggio se nessun appuntamento -->
+  <section class="no-appointments" *ngIf="appointments.length === 0">
+    <div class="empty-state">
+      <span class="empty-icon">📅</span>
+      <h3>Nessun Appuntamento</h3>
+      <p>Non hai ancora prenotato nessun servizio. Prenota ora per il tuo taglio perfetto!</p>
+      <button class="btn btn-primary" (click)="navigateToBooking()">✂️ Prenota Subito</button>
+    </div>
+  </section>
+
+  <!-- Lista d'Attesa -->
+  <section class="waiting-list-section" *ngIf="waitingList.length > 0">
+    <h2>⏳ Lista d'Attesa</h2>
+    <div class="waiting-list-cards">
+      <div class="waiting-card" *ngFor="let waiting of waitingList; let i = index">
+        <div class="waiting-header">
+          <span class="waiting-service">{{ getServiceName(waiting.service) }}</span>
+          <span class="position-badge">Posizione: {{ i + 1 }}</span>
+        </div>
+        <p><strong>Barbiere:</strong> {{ getBarberFullName(waiting.barber) }}</p>
+        <p><strong>Data Richiesta:</strong> {{ waiting.dataRichiesta | date: 'dd/MM/yyyy' }}</p>
+        <p class="waiting-status">{{ getWaitingStatusMessage(waiting) }}</p>
+        <button class="btn btn-outline" (click)="removeFromWaitingList(waiting.id)">
+          🗑️ Rimuovi dalla Coda
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Perché Scegliere Noi -->
+  <section class="why-choose-us">
+    <h2>✨ Perché Scegliere la Nostra Barberia</h2>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">👨‍💼</div>
+        <h3>Barbieri Esperti</h3>
+        <p>Professionisti con oltre 10 anni di esperienza nel settore</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">⏰</div>
+        <h3>Prenotazione Online</h3>
+        <p>Prenota quando vuoi, 24/7, con conferma immediata</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">💎</div>
+        <h3>Servizi Premium</h3>
+        <p>Prodotti di alta qualità e trattamenti personalizzati</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🏆</div>
+        <h3>Miglior Prezzo</h3>
+        <p>Qualità superiore a prezzi competitivi e convenienti</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🎯</div>
+        <h3>Stile su Misura</h3>
+        <p>Consulenza personalizzata per il taglio perfetto per te</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔔</div>
+        <h3>Lista d'Attesa</h3>
+        <p>Sistema FIFO automatico se il giorno è pieno</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Call to Action Finale -->
+  <section class="cta-section">
+    <div class="cta-content">
+      <h2>🚀 Pronto per il Tuo Nuovo Look?</h2>
+      <p>Prenota ora e vivi l'esperienza della migliore barberia della città!</p>
+      <button class="btn btn-primary btn-large" (click)="navigateToBooking()">
+        ✂️ Prenota il Tuo Servizio
+      </button>
+    </div>
+  </section>
+</div>

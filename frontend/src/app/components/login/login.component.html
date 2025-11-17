@@ -1,0 +1,52 @@
+<div class="login-container">
+  <div class="login-card">
+    <div class="login-logo">
+      <h1>💈 Barbershop</h1>
+      <p>Accedi al tuo account</p>
+    </div>
+
+    <div class="error-message" *ngIf="errorMessage">
+      {{ errorMessage }}
+    </div>
+
+    <form class="login-form" (ngSubmit)="login()">
+      <div class="form-group">
+        <label class="form-label" for="email">Email</label>
+        <input
+          type="email"
+          id="email"
+          class="form-control"
+          [(ngModel)]="credentials.email"
+          name="email"
+          placeholder="esempio@email.com"
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="password">Password</label>
+        <input
+          type="password"
+          id="password"
+          class="form-control"
+          [(ngModel)]="credentials.password"
+          name="password"
+          placeholder="••••••••"
+          required
+        />
+      </div>
+
+      <div class="login-actions">
+        <button type="submit" class="btn btn-primary btn-full-width">Accedi</button>
+      </div>
+    </form>
+
+    <div class="login-divider">
+      <span>oppure</span>
+    </div>
+
+    <div class="login-footer">
+      <p>Non hai un account? <a routerLink="/register">Registrati</a></p>
+    </div>
+  </div>
+</div>
