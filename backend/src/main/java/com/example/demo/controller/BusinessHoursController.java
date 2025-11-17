@@ -22,7 +22,7 @@ public class BusinessHoursController {
     }
 
     @PutMapping
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'ROLE_ADMIN')")
     public ResponseEntity<List<BusinessHours>> updateBusinessHours(@RequestBody List<BusinessHours> hours) {
         return ResponseEntity.ok(businessHoursService.updateBusinessHours(hours));
     }
