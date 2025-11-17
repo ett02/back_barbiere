@@ -31,6 +31,18 @@ Il backend richiede un database MySQL per funzionare.
 
     > **Nota**: Ricorda il `nome_del_database` che hai scelto, ti servirà per configurare il backend.
 
+#### Script di popolamento iniziale
+
+Per avere subito dati di test (un admin, un cliente, servizi, barbieri, orari del negozio e disponibilità settimanale) puoi
+eseguire lo script `backend/database/seed_sample_data.sql` direttamente da DBeaver dopo aver selezionato il database appena
+creato. Lo script:
+
+- svuota le tabelle principali rispettando le chiavi esterne;
+- inserisce due utenti con password predefinita `password` (hash BCrypt già presente nello script);
+- popola i cataloghi di servizi, barbieri, disponibilità e orari.
+
+> Ricordati di cambiare le password o creare utenti reali prima di andare in produzione.
+
 ### 2. Configurazione del Backend
 
 Il backend è un'applicazione Spring Boot. La configurazione avviene tramite il file `application.properties`.
