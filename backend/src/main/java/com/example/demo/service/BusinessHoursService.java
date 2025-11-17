@@ -19,6 +19,7 @@ public class BusinessHoursService {
 
     public List<BusinessHours> getBusinessHours() {
         List<BusinessHours> hours = businessHoursRepository.findAll();
+        hours = removeDuplicateDays(hours);
 
         if (hours.isEmpty()) {
             hours = createDefaultHours();
@@ -36,12 +37,7 @@ public class BusinessHoursService {
         for (BusinessHours incoming : updatedHours) {
             validateBusinessHour(incoming);
 
-            BusinessHours entity = businessHoursRepository.findByGiorno(incoming.getGiorno())
-                    .orElseGet(() -> {
-                        BusinessHours newEntry = new BusinessHours();
-                        newEntry.setGiorno(incoming.getGiorno());
-                        return newEntry;
-                    });
+            BusinessHours entity = findOrCreateUniqueEntry(incoming.getGiorno());
 
             entity.setAperto(incoming.isAperto());
             entity.setApertura(incoming.isAperto() ? incoming.getApertura() : null);
@@ -52,6 +48,53 @@ public class BusinessHoursService {
 
         result.sort(Comparator.comparingInt(BusinessHours::getGiorno));
         return result;
+    }
+
+    private List<BusinessHours> removeDuplicateDays(List<BusinessHours> entries) {
+        if (entries.isEmpty()) {
+            return entries;
+        }
+
+        List<BusinessHours> uniqueEntries = new ArrayList<>();
+        List<BusinessHours> duplicates = new ArrayList<>();
+
+        entries.sort(Comparator.comparingInt(BusinessHours::getGiorno));
+
+        Integer currentDay = null;
+        for (BusinessHours entry : entries) {
+            if (currentDay == null || !currentDay.equals(entry.getGiorno())) {
+                uniqueEntries.add(entry);
+                currentDay = entry.getGiorno();
+            } else {
+                duplicates.add(entry);
+            }
+        }
+
+        if (!duplicates.isEmpty()) {
+            businessHoursRepository.deleteAll(duplicates);
+        }
+
+        return uniqueEntries;
+    }
+
+    private BusinessHours findOrCreateUniqueEntry(Integer giorno) {
+        List<BusinessHours> matches = businessHoursRepository.findAllByGiorno(giorno);
+
+        if (matches.isEmpty()) {
+            BusinessHours newEntry = new BusinessHours();
+            newEntry.setGiorno(giorno);
+            return newEntry;
+        }
+
+        matches.sort(Comparator.comparing(BusinessHours::getId, Comparator.nullsLast(Long::compareTo)));
+
+        BusinessHours entity = matches.get(0);
+        if (matches.size() > 1) {
+            List<BusinessHours> duplicates = new ArrayList<>(matches.subList(1, matches.size()));
+            businessHoursRepository.deleteAll(duplicates);
+        }
+
+        return entity;
     }
 
     private List<BusinessHours> createDefaultHours() {
