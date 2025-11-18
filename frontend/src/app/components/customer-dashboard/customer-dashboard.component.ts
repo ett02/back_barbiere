@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/core';
 import { ApiService } from '../../services/api.service';
 import { AuthService } from '../../services/auth.service';
 import { Router } from '@angular/router';
@@ -7,13 +7,15 @@ import { Appointment } from '../../models/appointment.model';
 import { WaitingList } from '../../models/waiting-list.model';
 import { Service } from '../../models/service.model';
 import { Barber } from '../../models/barber.model';
+import { AppointmentFilterPipe } from '../../pipes/appointment-filter.pipe';
 
 @Component({
   selector: 'app-customer-dashboard',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, AppointmentFilterPipe],
   templateUrl: './customer-dashboard.component.html',
   styleUrls: ['./customer-dashboard.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CustomerDashboardComponent implements OnInit {
   private apiService = inject(ApiService);
@@ -160,22 +162,6 @@ export class CustomerDashboardComponent implements OnInit {
     }
     const dateTime = this.getAppointmentDateTime(appointment);
     return !!dateTime && dateTime >= new Date();
-  }
-
-  get filteredAppointments(): Appointment[] {
-    return this.appointments.filter((appointment) => {
-      const dateTime = this.getAppointmentDateTime(appointment);
-      switch (this.selectedFilter) {
-        case 'UPCOMING':
-          return this.isUpcoming(appointment);
-        case 'CANCELED':
-          return appointment.stato === 'ANNULLATO';
-        case 'PAST':
-          return appointment.stato !== 'ANNULLATO' && !!dateTime && dateTime < new Date();
-        default:
-          return false;
-      }
-    });
   }
 
   getCurrentFilterMessage(): string {

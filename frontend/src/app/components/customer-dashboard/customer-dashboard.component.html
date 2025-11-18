@@ -54,11 +54,23 @@
     </div>
     <p class="filter-helper">{{ getCurrentFilterMessage() }}</p>
 
-    <ng-container *ngIf="filteredAppointments.length > 0; else emptyFiltered">
+    <ng-container
+      *ngIf="
+        (appointments | appointmentFilter: selectedFilter).length > 0;
+        else emptyFiltered
+      "
+    >
       <div class="appointments-grid">
-        <div class="appointment-card" *ngFor="let appointment of filteredAppointments">
+        <div
+          class="appointment-card"
+          *ngFor="
+            let appointment of appointments | appointmentFilter: selectedFilter
+          "
+        >
           <div class="appointment-header">
-            <span class="service-name">{{ getServiceName(appointment.service) }}</span>
+            <span class="service-name">{{
+              getServiceName(appointment.service)
+            }}</span>
             <span class="status-badge" [class]="getAppointmentStatusClass(appointment)">
               {{ appointment.stato || 'PENDING' }}
             </span>
