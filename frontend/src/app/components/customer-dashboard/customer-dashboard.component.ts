@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { ApiService } from '../../services/api.service';
 import { AuthService } from '../../services/auth.service';
 import { Router } from '@angular/router';
@@ -7,6 +7,8 @@ import { Appointment } from '../../models/appointment.model';
 import { WaitingList } from '../../models/waiting-list.model';
 import { Service } from '../../models/service.model';
 import { Barber } from '../../models/barber.model';
+import { BehaviorSubject, Observable, combineLatest, of } from 'rxjs';
+import { catchError, map, switchMap, shareReplay } from 'rxjs/operators';
 
 @Component({
   selector: 'app-customer-dashboard',
@@ -14,6 +16,7 @@ import { Barber } from '../../models/barber.model';
   imports: [CommonModule],
   templateUrl: './customer-dashboard.component.html',
   styleUrls: ['./customer-dashboard.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CustomerDashboardComponent implements OnInit {
   private apiService = inject(ApiService);
@@ -21,9 +24,56 @@ export class CustomerDashboardComponent implements OnInit {
   private router = inject(Router);
 
   customerName = 'Cliente';
-  appointments: Appointment[] = [];
-  waitingList: WaitingList[] = [];
-  selectedFilter: 'UPCOMING' | 'CANCELED' | 'PAST' = 'UPCOMING';
+
+  private refreshAppointments$ = new BehaviorSubject<void>(undefined);
+  private refreshWaitingList$ = new BehaviorSubject<void>(undefined);
+  selectedFilter$ = new BehaviorSubject<'UPCOMING' | 'CANCELED' | 'PAST'>('UPCOMING');
+
+  appointments$: Observable<Appointment[]> = this.refreshAppointments$.pipe(
+    switchMap(() => {
+      const decodedToken = this.authService.getDecodedToken();
+      if (!decodedToken || typeof decodedToken.id !== 'number') return of([]);
+      return this.apiService.getAppointmentsByUserId(decodedToken.id);
+    }),
+    catchError((error) => {
+      console.error('Error fetching appointments:', error);
+      return of([]);
+    }),
+    shareReplay(1)
+  );
+
+  filteredAppointments$: Observable<Appointment[]> = combineLatest([
+    this.appointments$,
+    this.selectedFilter$,
+  ]).pipe(
+    map(([appointments, filter]) => {
+      return appointments.filter((appointment) => {
+        const dateTime = this.getAppointmentDateTime(appointment);
+        switch (filter) {
+          case 'UPCOMING':
+            return this.isUpcoming(appointment);
+          case 'CANCELED':
+            return appointment.stato === 'ANNULLATO';
+          case 'PAST':
+            return appointment.stato !== 'ANNULLATO' && !!dateTime && dateTime < new Date();
+          default:
+            return false;
+        }
+      });
+    })
+  );
+
+  waitingList$: Observable<WaitingList[]> = this.refreshWaitingList$.pipe(
+    switchMap(() => {
+      const decodedToken = this.authService.getDecodedToken();
+      if (!decodedToken || typeof decodedToken.id !== 'number') return of([]);
+      return this.apiService.getWaitingListByCustomerId(decodedToken.id);
+    }),
+    catchError((error) => {
+      console.error('Error fetching waiting list:', error);
+      return of([]);
+    })
+  );
 
   ngOnInit(): void {
     // Get customer name from JWT token
@@ -31,50 +81,6 @@ export class CustomerDashboardComponent implements OnInit {
     if (decodedToken && decodedToken.sub) {
       // Extract name from email (before @)
       this.customerName = decodedToken.sub.split('@')[0];
-    }
-
-    // Load customer appointments
-    this.loadAppointments();
-
-    // Load waiting list
-    this.loadWaitingList();
-  }
-
-  loadAppointments(): void {
-    const decodedToken = this.authService.getDecodedToken();
-    if (decodedToken) {
-      const userId = decodedToken.id;
-      if (typeof userId !== 'number') {
-        console.error('User ID is missing in the decoded token.');
-        return;
-      }
-      this.apiService.getAppointmentsByUserId(userId).subscribe(
-        (data) => {
-          this.appointments = data;
-        },
-        (error) => {
-          console.error('Error fetching appointments:', error);
-        },
-      );
-    }
-  }
-
-  loadWaitingList(): void {
-    const decodedToken = this.authService.getDecodedToken();
-    if (decodedToken) {
-      const userId = decodedToken.id;
-      if (typeof userId !== 'number') {
-        console.error('User ID is missing in the decoded token.');
-        return;
-      }
-      this.apiService.getWaitingListByCustomerId(userId).subscribe(
-        (data) => {
-          this.waitingList = data;
-        },
-        (error) => {
-          console.error('Error fetching waiting list:', error);
-        },
-      );
     }
   }
 
@@ -86,11 +92,11 @@ export class CustomerDashboardComponent implements OnInit {
     if (confirm('Sei sicuro di voler cancellare questo appuntamento?')) {
       this.apiService.cancelAppointment(appointmentId).subscribe(
         () => {
-          this.loadAppointments();
+          this.refreshAppointments$.next();
         },
         (error) => {
           console.error('Error canceling appointment:', error);
-        },
+        }
       );
     }
   }
@@ -99,11 +105,11 @@ export class CustomerDashboardComponent implements OnInit {
     if (confirm("Vuoi rimuoverti dalla lista d'attesa?")) {
       this.apiService.removeFromWaitingList(waitingId).subscribe(
         () => {
-          this.loadWaitingList();
+          this.refreshWaitingList$.next();
         },
         (error) => {
           console.error('Error removing from waiting list:', error);
-        },
+        }
       );
     }
   }
@@ -151,7 +157,7 @@ export class CustomerDashboardComponent implements OnInit {
   }
 
   setFilter(filter: 'UPCOMING' | 'CANCELED' | 'PAST'): void {
-    this.selectedFilter = filter;
+    this.selectedFilter$.next(filter);
   }
 
   isUpcoming(appointment: Appointment): boolean {
@@ -162,24 +168,8 @@ export class CustomerDashboardComponent implements OnInit {
     return !!dateTime && dateTime >= new Date();
   }
 
-  get filteredAppointments(): Appointment[] {
-    return this.appointments.filter((appointment) => {
-      const dateTime = this.getAppointmentDateTime(appointment);
-      switch (this.selectedFilter) {
-        case 'UPCOMING':
-          return this.isUpcoming(appointment);
-        case 'CANCELED':
-          return appointment.stato === 'ANNULLATO';
-        case 'PAST':
-          return appointment.stato !== 'ANNULLATO' && !!dateTime && dateTime < new Date();
-        default:
-          return false;
-      }
-    });
-  }
-
-  getCurrentFilterMessage(): string {
-    switch (this.selectedFilter) {
+  getCurrentFilterMessage(filter: string | null): string {
+    switch (filter) {
       case 'UPCOMING':
         return 'Mostro solo gli appuntamenti confermati da svolgere';
       case 'CANCELED':
@@ -205,3 +195,4 @@ export class CustomerDashboardComponent implements OnInit {
     return isNaN(parsedDate.getTime()) ? null : parsedDate;
   }
 }
+

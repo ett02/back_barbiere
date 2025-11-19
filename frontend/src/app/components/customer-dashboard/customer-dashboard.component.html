@@ -22,103 +22,97 @@
   </section>
 
   <!-- I Miei Appuntamenti -->
-  <section class="appointments-section" *ngIf="appointments.length > 0; else noAppointments">
-    <div class="appointments-header">
-      <h2>📋 I Miei Appuntamenti</h2>
-      <div class="filter-tabs" role="group" aria-label="Filtra appuntamenti">
-        <button
-          type="button"
-          class="filter-chip"
-          [class.active]="selectedFilter === 'UPCOMING'"
-          (click)="setFilter('UPCOMING')"
-        >
-          Da fare
-        </button>
-        <button
-          type="button"
-          class="filter-chip"
-          [class.active]="selectedFilter === 'CANCELED'"
-          (click)="setFilter('CANCELED')"
-        >
-          Annullati
-        </button>
-        <button
-          type="button"
-          class="filter-chip"
-          [class.active]="selectedFilter === 'PAST'"
-          (click)="setFilter('PAST')"
-        >
-          Passati
-        </button>
+  <ng-container *ngIf="(appointments$ | async) as appointments; else loadingAppointments">
+    <section class="appointments-section" *ngIf="appointments.length > 0; else noAppointments">
+      <div class="appointments-header" *ngIf="(selectedFilter$ | async) as selectedFilter">
+        <h2>📋 I Miei Appuntamenti</h2>
+        <div class="filter-tabs" role="group" aria-label="Filtra appuntamenti">
+          <button type="button" class="filter-chip" [class.active]="selectedFilter === 'UPCOMING'"
+            (click)="setFilter('UPCOMING')">
+            Da fare
+          </button>
+          <button type="button" class="filter-chip" [class.active]="selectedFilter === 'CANCELED'"
+            (click)="setFilter('CANCELED')">
+            Annullati
+          </button>
+          <button type="button" class="filter-chip" [class.active]="selectedFilter === 'PAST'"
+            (click)="setFilter('PAST')">
+            Passati
+          </button>
+        </div>
       </div>
-    </div>
-    <p class="filter-helper">{{ getCurrentFilterMessage() }}</p>
+      <p class="filter-helper">{{ getCurrentFilterMessage(selectedFilter$ | async) }}</p>
 
-    <ng-container *ngIf="filteredAppointments.length > 0; else emptyFiltered">
-      <div class="appointments-grid">
-        <div class="appointment-card" *ngFor="let appointment of filteredAppointments">
-          <div class="appointment-header">
-            <span class="service-name">{{ getServiceName(appointment.service) }}</span>
-            <span class="status-badge" [class]="getAppointmentStatusClass(appointment)">
-              {{ appointment.stato || 'PENDING' }}
-            </span>
+      <ng-container *ngIf="(filteredAppointments$ | async) as filteredAppointments">
+        <ng-container *ngIf="filteredAppointments.length > 0; else emptyFiltered">
+          <div class="appointments-grid">
+            <div class="appointment-card" *ngFor="let appointment of filteredAppointments">
+              <div class="appointment-header">
+                <span class="service-name">{{ getServiceName(appointment.service) }}</span>
+                <span class="status-badge" [class]="getAppointmentStatusClass(appointment)">
+                  {{ appointment.stato || 'PENDING' }}
+                </span>
+              </div>
+              <div class="appointment-details">
+                <p><strong>Barbiere:</strong> {{ getBarberFullName(appointment.barber) }}</p>
+                <p><strong>Data:</strong> {{ appointment.data | date: 'dd/MM/yyyy' }}</p>
+                <p><strong>Orario:</strong> {{ appointment.orarioInizio }}</p>
+                <p><strong>Durata:</strong> {{ getServiceDuration(appointment.service) }}</p>
+              </div>
+              <button class="btn btn-secondary btn-cancel" *ngIf="isUpcoming(appointment)"
+                (click)="cancelAppointment(appointment.id)">
+                ❌ Cancella Appuntamento
+              </button>
+            </div>
           </div>
-          <div class="appointment-details">
-            <p><strong>Barbiere:</strong> {{ getBarberFullName(appointment.barber) }}</p>
-            <p><strong>Data:</strong> {{ appointment.data | date: 'dd/MM/yyyy' }}</p>
-            <p><strong>Orario:</strong> {{ appointment.orarioInizio }}</p>
-            <p><strong>Durata:</strong> {{ getServiceDuration(appointment.service) }}</p>
+        </ng-container>
+      </ng-container>
+    </section>
+
+    <ng-template #emptyFiltered>
+      <div class="no-results" *ngIf="(selectedFilter$ | async) as selectedFilter">
+        <span class="empty-icon">�</span>
+        <p *ngIf="selectedFilter === 'UPCOMING'">Non hai appuntamenti confermati da fare.</p>
+        <p *ngIf="selectedFilter === 'CANCELED'">Non ci sono appuntamenti annullati.</p>
+        <p *ngIf="selectedFilter === 'PAST'">Non ci sono appuntamenti passati da mostrare.</p>
+      </div>
+    </ng-template>
+
+    <!-- Messaggio se nessun appuntamento in assoluto -->
+    <ng-template #noAppointments>
+      <section class="no-appointments">
+        <div class="empty-state">
+          <span class="empty-icon">📅</span>
+          <h3>Nessun Appuntamento</h3>
+          <p>Non hai ancora prenotato nessun servizio. Prenota ora per il tuo taglio perfetto!</p>
+          <button class="btn btn-primary" (click)="navigateToBooking()">✂️ Prenota Subito</button>
+        </div>
+      </section>
+    </ng-template>
+  </ng-container>
+  <ng-template #loadingAppointments>
+    <p class="loading">Caricamento appuntamenti...</p>
+  </ng-template>
+
+  <!-- Lista d'Attesa -->
+  <section class="waiting-list-section" *ngIf="(waitingList$ | async) as waitingList">
+    <ng-container *ngIf="waitingList.length > 0">
+      <h2>⏳ Lista d'Attesa</h2>
+      <div class="waiting-list-cards">
+        <div class="waiting-card" *ngFor="let waiting of waitingList; let i = index">
+          <div class="waiting-header">
+            <span class="waiting-service">{{ getServiceName(waiting.service) }}</span>
+            <span class="position-badge">Posizione: {{ i + 1 }}</span>
           </div>
-          <button
-            class="btn btn-secondary btn-cancel"
-            *ngIf="isUpcoming(appointment)"
-            (click)="cancelAppointment(appointment.id)"
-          >
-            ❌ Cancella Appuntamento
+          <p><strong>Barbiere:</strong> {{ getBarberFullName(waiting.barber) }}</p>
+          <p><strong>Data Richiesta:</strong> {{ waiting.dataRichiesta | date: 'dd/MM/yyyy' }}</p>
+          <p class="waiting-status">{{ getWaitingStatusMessage(waiting) }}</p>
+          <button class="btn btn-outline" (click)="removeFromWaitingList(waiting.id)">
+            🗑️ Rimuovi dalla Coda
           </button>
         </div>
       </div>
     </ng-container>
-  </section>
-
-  <ng-template #emptyFiltered>
-    <div class="no-results">
-      <span class="empty-icon">📂</span>
-      <p *ngIf="selectedFilter === 'UPCOMING'">Non hai appuntamenti confermati da fare.</p>
-      <p *ngIf="selectedFilter === 'CANCELED'">Non ci sono appuntamenti annullati.</p>
-      <p *ngIf="selectedFilter === 'PAST'">Non ci sono appuntamenti passati da mostrare.</p>
-    </div>
-  </ng-template>
-
-  <!-- Messaggio se nessun appuntamento in assoluto -->
-  <ng-template #noAppointments>
-    <section class="no-appointments">
-      <div class="empty-state">
-        <span class="empty-icon">📅</span>
-        <h3>Nessun Appuntamento</h3>
-        <p>Non hai ancora prenotato nessun servizio. Prenota ora per il tuo taglio perfetto!</p>
-        <button class="btn btn-primary" (click)="navigateToBooking()">✂️ Prenota Subito</button>
-      </div>
-    </section>
-  </ng-template>
-
-  <!-- Lista d'Attesa -->
-  <section class="waiting-list-section" *ngIf="waitingList.length > 0">
-    <h2>⏳ Lista d'Attesa</h2>
-    <div class="waiting-list-cards">
-      <div class="waiting-card" *ngFor="let waiting of waitingList; let i = index">
-        <div class="waiting-header">
-          <span class="waiting-service">{{ getServiceName(waiting.service) }}</span>
-          <span class="position-badge">Posizione: {{ i + 1 }}</span>
-        </div>
-        <p><strong>Barbiere:</strong> {{ getBarberFullName(waiting.barber) }}</p>
-        <p><strong>Data Richiesta:</strong> {{ waiting.dataRichiesta | date: 'dd/MM/yyyy' }}</p>
-        <p class="waiting-status">{{ getWaitingStatusMessage(waiting) }}</p>
-        <button class="btn btn-outline" (click)="removeFromWaitingList(waiting.id)">
-          🗑️ Rimuovi dalla Coda
-        </button>
-      </div>
-    </div>
   </section>
 
   <!-- Perché Scegliere Noi -->

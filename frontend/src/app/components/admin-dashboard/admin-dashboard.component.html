@@ -37,82 +37,71 @@
       <div class="panel-body agenda-body">
         <div class="table-card">
           <h3>Servizi disponibili</h3>
-          <table class="data-table" *ngIf="services.length > 0; else emptyServices">
-            <thead>
-              <tr>
-                <th>Nome</th>
-                <th>Durata</th>
-                <th>Prezzo</th>
-                <th>Descrizione</th>
-                <th class="actions">Azioni</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let service of services">
-                <td>
-                  <ng-container *ngIf="editingService?.id !== service.id; else editServiceName">
-                    {{ service.nome }}
-                  </ng-container>
-                  <ng-template #editServiceName>
-                    <input
-                      type="text"
-                      [(ngModel)]="editingService!.nome"
-                      [ngModelOptions]="{ standalone: true }"
-                    />
-                  </ng-template>
-                </td>
-                <td>
-                  <ng-container *ngIf="editingService?.id !== service.id; else editServiceDuration">
-                    {{ service.durata }} min
-                  </ng-container>
-                  <ng-template #editServiceDuration>
-                    <input
-                      type="number"
-                      min="0"
-                      [(ngModel)]="editingService!.durata"
-                      [ngModelOptions]="{ standalone: true }"
-                    />
-                  </ng-template>
-                </td>
-                <td>
-                  <ng-container *ngIf="editingService?.id !== service.id; else editServicePrice">
-                    €{{ service.prezzo | number: '1.2-2' }}
-                  </ng-container>
-                  <ng-template #editServicePrice>
-                    <input
-                      type="number"
-                      min="0"
-                      step="0.5"
-                      [(ngModel)]="editingService!.prezzo"
-                      [ngModelOptions]="{ standalone: true }"
-                    />
-                  </ng-template>
-                </td>
-                <td class="description-cell">
-                  <ng-container *ngIf="editingService?.id !== service.id; else editServiceDescription">
-                    {{ service.descrizione }}
-                  </ng-container>
-                  <ng-template #editServiceDescription>
-                    <textarea
-                      rows="2"
-                      [(ngModel)]="editingService!.descrizione"
-                      [ngModelOptions]="{ standalone: true }"
-                    ></textarea>
-                  </ng-template>
-                </td>
-                <td class="actions">
-                  <ng-container *ngIf="editingService?.id === service.id; else viewServiceActions">
-                    <button type="button" class="btn primary" (click)="saveService()">Salva</button>
-                    <button type="button" class="btn ghost" (click)="cancelEditService()">Annulla</button>
-                  </ng-container>
-                  <ng-template #viewServiceActions>
-                    <button type="button" class="btn ghost" (click)="startEditService(service)">Modifica</button>
-                  </ng-template>
-                  <button type="button" class="btn danger" (click)="deleteService(service.id)">Elimina</button>
-                </td>
-              </tr>
-            </tbody>
+          <table class="data-table" *ngIf="(services$ | async) as services; else loadingServices">
+            <ng-container *ngIf="services.length > 0; else emptyServices">
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th>Durata</th>
+                  <th>Prezzo</th>
+                  <th>Descrizione</th>
+                  <th class="actions">Azioni</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let service of services">
+                  <td>
+                    <ng-container *ngIf="editingService?.id !== service.id; else editServiceName">
+                      {{ service.nome }}
+                    </ng-container>
+                    <ng-template #editServiceName>
+                      <input type="text" [(ngModel)]="editingService!.nome" [ngModelOptions]="{ standalone: true }" />
+                    </ng-template>
+                  </td>
+                  <td>
+                    <ng-container *ngIf="editingService?.id !== service.id; else editServiceDuration">
+                      {{ service.durata }} min
+                    </ng-container>
+                    <ng-template #editServiceDuration>
+                      <input type="number" min="0" [(ngModel)]="editingService!.durata"
+                        [ngModelOptions]="{ standalone: true }" />
+                    </ng-template>
+                  </td>
+                  <td>
+                    <ng-container *ngIf="editingService?.id !== service.id; else editServicePrice">
+                      €{{ service.prezzo | number: '1.2-2' }}
+                    </ng-container>
+                    <ng-template #editServicePrice>
+                      <input type="number" min="0" step="0.5" [(ngModel)]="editingService!.prezzo"
+                        [ngModelOptions]="{ standalone: true }" />
+                    </ng-template>
+                  </td>
+                  <td class="description-cell">
+                    <ng-container *ngIf="editingService?.id !== service.id; else editServiceDescription">
+                      {{ service.descrizione }}
+                    </ng-container>
+                    <ng-template #editServiceDescription>
+                      <textarea rows="2" [(ngModel)]="editingService!.descrizione"
+                        [ngModelOptions]="{ standalone: true }"></textarea>
+                    </ng-template>
+                  </td>
+                  <td class="actions">
+                    <ng-container *ngIf="editingService?.id === service.id; else viewServiceActions">
+                      <button type="button" class="btn primary" (click)="saveService()">Salva</button>
+                      <button type="button" class="btn ghost" (click)="cancelEditService()">Annulla</button>
+                    </ng-container>
+                    <ng-template #viewServiceActions>
+                      <button type="button" class="btn ghost" (click)="startEditService(service)">Modifica</button>
+                    </ng-template>
+                    <button type="button" class="btn danger" (click)="deleteService(service.id)">Elimina</button>
+                  </td>
+                </tr>
+              </tbody>
+            </ng-container>
           </table>
+          <ng-template #loadingServices>
+            <p class="loading">Caricamento servizi...</p>
+          </ng-template>
           <ng-template #emptyServices>
             <p class="empty-state">Non ci sono servizi disponibili al momento.</p>
           </ng-template>
@@ -155,79 +144,70 @@
       <div class="panel-body barbers-body">
         <div class="table-card">
           <h3>Barbieri attivi</h3>
-          <table class="data-table" *ngIf="barbers.length > 0; else emptyBarbers">
-            <thead>
-              <tr>
-                <th>Nome</th>
-                <th>Cognome</th>
-                <th>Esperienza</th>
-                <th>Specialità</th>
-                <th class="actions">Azioni</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let barber of barbers">
-                <td>
-                  <ng-container *ngIf="editingBarber?.id !== barber.id; else editBarberName">
-                    {{ barber.nome }}
-                  </ng-container>
-                  <ng-template #editBarberName>
-                    <input
-                      type="text"
-                      [(ngModel)]="editingBarber!.nome"
-                      [ngModelOptions]="{ standalone: true }"
-                    />
-                  </ng-template>
-                </td>
-                <td>
-                  <ng-container *ngIf="editingBarber?.id !== barber.id; else editBarberSurname">
-                    {{ barber.cognome }}
-                  </ng-container>
-                  <ng-template #editBarberSurname>
-                    <input
-                      type="text"
-                      [(ngModel)]="editingBarber!.cognome"
-                      [ngModelOptions]="{ standalone: true }"
-                    />
-                  </ng-template>
-                </td>
-                <td>
-                  <ng-container *ngIf="editingBarber?.id !== barber.id; else editBarberExperience">
-                    {{ barber.esperienza }}
-                  </ng-container>
-                  <ng-template #editBarberExperience>
-                    <input
-                      type="text"
-                      [(ngModel)]="editingBarber!.esperienza"
-                      [ngModelOptions]="{ standalone: true }"
-                    />
-                  </ng-template>
-                </td>
-                <td>
-                  <ng-container *ngIf="editingBarber?.id !== barber.id; else editBarberSpecialty">
-                    {{ barber.specialita }}
-                  </ng-container>
-                  <ng-template #editBarberSpecialty>
-                    <input
-                      type="text"
-                      [(ngModel)]="editingBarber!.specialita"
-                      [ngModelOptions]="{ standalone: true }"
-                    />
-                  </ng-template>
-                </td>
-                <td class="actions">
-                  <ng-container *ngIf="editingBarber?.id === barber.id; else viewBarberActions">
-                    <button type="button" class="btn primary" (click)="saveBarber()">Salva</button>
-                    <button type="button" class="btn ghost" (click)="cancelEditBarber()">Annulla</button>
-                  </ng-container>
-                  <ng-template #viewBarberActions>
-                    <button type="button" class="btn ghost" (click)="startEditBarber(barber)">Modifica</button>
-                  </ng-template>
-                  <button type="button" class="btn danger" (click)="deleteBarber(barber.id)">Elimina</button>
-                </td>
-              </tr>
-            </tbody>
+          <table class="data-table" *ngIf="(barbers$ | async) as barbers; else loadingBarbers">
+            <ng-container *ngIf="barbers.length > 0; else emptyBarbers">
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th>Cognome</th>
+                  <th>Esperienza</th>
+                  <th>Specialità</th>
+                  <th class="actions">Azioni</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let barber of barbers">
+                  <td>
+                    <ng-container *ngIf="editingBarber?.id !== barber.id; else editBarberName">
+                      {{ barber.nome }}
+                    </ng-container>
+                    <ng-template #editBarberName>
+                      <input type="text" [(ngModel)]="editingBarber!.nome" [ngModelOptions]="{ standalone: true }" />
+                    </ng-template>
+                  </td>
+                  <td>
+                    <ng-container *ngIf="editingBarber?.id !== barber.id; else editBarberSurname">
+                      {{ barber.cognome }}
+                    </ng-container>
+                    <ng-template #editBarberSurname>
+                      <input type="text" [(ngModel)]="editingBarber!.cognome" [ngModelOptions]="{ standalone: true }" />
+                    </ng-template>
+                  </td>
+                  <td>
+                    <ng-container *ngIf="editingBarber?.id !== barber.id; else editBarberExperience">
+                      {{ barber.esperienza }}
+                    </ng-container>
+                    <ng-template #editBarberExperience>
+                      <input type="text" [(ngModel)]="editingBarber!.esperienza"
+                        [ngModelOptions]="{ standalone: true }" />
+                    </ng-template>
+                  </td>
+                  <td>
+                    <ng-container *ngIf="editingBarber?.id !== barber.id; else editBarberSpecialty">
+                      {{ barber.specialita }}
+                    </ng-container>
+                    <ng-template #editBarberSpecialty>
+                      <input type="text" [(ngModel)]="editingBarber!.specialita"
+                        [ngModelOptions]="{ standalone: true }" />
+                    </ng-template>
+                  </td>
+                  <td class="actions">
+                    <ng-container *ngIf="editingBarber?.id === barber.id; else viewBarberActions">
+                      <button type="button" class="btn primary" (click)="saveBarber()">Salva</button>
+                      <button type="button" class="btn ghost" (click)="cancelEditBarber()">Annulla</button>
+                    </ng-container>
+                    <ng-template #viewBarberActions>
+                      <button type="button" class="btn ghost" (click)="startEditBarber(barber)">Modifica</button>
+                    </ng-template>
+                    <button type="button" class="btn danger" (click)="deleteBarber(barber.id)">Elimina</button>
+                  </td>
+                </tr>
+              </tbody>
+            </ng-container>
           </table>
+          <ng-template #loadingBarbers>
+            <p class="loading">Caricamento barbieri...</p>
+          </ng-template>
           <ng-template #emptyBarbers>
             <p class="empty-state">Non ci sono barbieri registrati.</p>
           </ng-template>
@@ -247,12 +227,9 @@
           <div class="services-dropdown" *ngIf="servicesDropdownOpen">
             <div *ngIf="!editingBarberServiceIds" class="loading">Caricamento servizi...</div>
             <div class="services-checkboxes" *ngIf="editingBarberServiceIds">
-              <label class="service-check" *ngFor="let service of services">
-                <input
-                  type="checkbox"
-                  [checked]="editingBarberServiceIds.has(service.id!)"
-                  (change)="toggleServiceForEditingBarber(service.id!, $event.target.checked)"
-                />
+              <label class="service-check" *ngFor="let service of services$ | async">
+                <input type="checkbox" [checked]="editingBarberServiceIds.has(service.id!)"
+                  (change)="toggleServiceForEditingBarber(service.id!, $event.target.checked)" />
                 <span class="service-name">
                   {{ service.nome }} ({{ service.durata }} min • €{{ service.prezzo | number: '1.2-2' }})
                 </span>
@@ -261,7 +238,8 @@
           </div>
 
           <div class="services-selected" *ngIf="editingBarberServiceIds">
-            <span class="pill" *ngFor="let service of services" [hidden]="!editingBarberServiceIds.has(service.id!)">
+            <span class="pill" *ngFor="let service of services$ | async"
+              [hidden]="!editingBarberServiceIds.has(service.id!)">
               {{ service.nome }}
             </span>
           </div>
@@ -304,13 +282,8 @@
         <div class="agenda-controls">
           <label for="agenda-date">Seleziona una data</label>
           <div class="date-picker">
-            <input
-              id="agenda-date"
-              type="date"
-              [(ngModel)]="selectedDate"
-              name="agenda_date"
-              (change)="onAgendaDateChange()"
-            />
+            <input id="agenda-date" type="date" [(ngModel)]="selectedDate" name="agenda_date"
+              (change)="onAgendaDateChange()" />
             <button type="button" class="btn ghost today-btn" (click)="setToday()">Oggi</button>
           </div>
           <p class="date-hint">Scegli un giorno per vedere gli appuntamenti confermati in agenda.</p>
@@ -325,57 +298,52 @@
               <span class="weekday" *ngFor="let day of calendarWeekdays">{{ day }}</span>
             </div>
             <div class="calendar-grid">
-              <button
-                type="button"
-                class="day"
-                *ngFor="let day of calendarDays"
-                [class.outside]="!day.inMonth"
-                [class.today]="day.isToday"
-                [class.selected]="day.isSelected"
-                (click)="selectCalendarDay(day)"
-              >
+              <button type="button" class="day" *ngFor="let day of calendarDays" [class.outside]="!day.inMonth"
+                [class.today]="day.isToday" [class.selected]="day.isSelected" (click)="selectCalendarDay(day)">
                 {{ day.date.getDate() }}
               </button>
             </div>
           </div>
         </div>
 
-        <div *ngIf="appointments.length > 0; else emptyAppointments" class="appointments-grid">
-          <article class="appointment-card" *ngFor="let appointment of appointments">
-            <header class="appointment-header">
-              <div class="appointment-time-wrapper">
-                <span class="appointment-time">{{ formatTime(appointment.orarioInizio) }}</span>
-                <span class="appointment-duration" *ngIf="appointment.service?.durata">
-                  ⏱️ {{ appointment.service?.durata }} min
+        <div *ngIf="(appointments$ | async) as appointments; else loadingAppointments">
+          <div *ngIf="appointments.length > 0; else emptyAppointments" class="appointments-grid">
+            <article class="appointment-card" *ngFor="let appointment of appointments">
+              <header class="appointment-header">
+                <div class="appointment-time-wrapper">
+                  <span class="appointment-time">{{ formatTime(appointment.orarioInizio) }}</span>
+                  <span class="appointment-duration" *ngIf="appointment.service?.durata">
+                    ⏱️ {{ appointment.service?.durata }} min
+                  </span>
+                </div>
+                <span class="appointment-status" [ngClass]="getAppointmentStatusClass(appointment.stato)">
+                  {{ appointment.stato }}
                 </span>
-              </div>
-              <span
-                class="appointment-status"
-                [ngClass]="getAppointmentStatusClass(appointment.stato)"
-              >
-                {{ appointment.stato }}
-              </span>
-            </header>
+              </header>
 
-            <div class="appointment-body">
-              <h4 class="appointment-service">{{ appointment.service?.nome }}</h4>
-              <ul class="appointment-meta">
-                <li class="meta-item">
-                  <span class="meta-icon">🙍</span>
-                  <span>{{ appointment.customer?.nome }} {{ appointment.customer?.cognome }}</span>
-                </li>
-                <li class="meta-item">
-                  <span class="meta-icon">💈</span>
-                  <span>{{ appointment.barber?.nome }} {{ appointment.barber?.cognome }}</span>
-                </li>
-              </ul>
-            </div>
-          </article>
+              <div class="appointment-body">
+                <h4 class="appointment-service">{{ appointment.service?.nome }}</h4>
+                <ul class="appointment-meta">
+                  <li class="meta-item">
+                    <span class="meta-icon">🙍</span>
+                    <span>{{ appointment.customer?.nome }} {{ appointment.customer?.cognome }}</span>
+                  </li>
+                  <li class="meta-item">
+                    <span class="meta-icon">💈</span>
+                    <span>{{ appointment.barber?.nome }} {{ appointment.barber?.cognome }}</span>
+                  </li>
+                </ul>
+              </div>
+            </article>
+          </div>
         </div>
         <ng-template #emptyAppointments>
           <p class="empty-state">Non sono presenti appuntamenti per la data selezionata.</p>
         </ng-template>
       </div>
+      <ng-template #loadingAppointments>
+        <p class="loading">Caricamento appuntamenti...</p>
+      </ng-template>
     </section>
 
     <!-- Orari di apertura -->
@@ -385,18 +353,17 @@
           <h2>Orari di apertura</h2>
           <p>Definisci giorni di chiusura e fasce orarie di lavoro.</p>
         </div>
-        <button type="button" class="btn primary" (click)="saveBusinessHours()" [disabled]="isSavingBusinessHours">
-          {{ isSavingBusinessHours ? 'Salvataggio...' : 'Salva impostazioni' }}
-        </button>
+        <div *ngIf="(businessHours$ | async) as businessHours; else loadingHours">
+          <button type="button" class="btn primary" (click)="saveBusinessHours(businessHours)"
+            [disabled]="isSavingBusinessHours">
+            {{ isSavingBusinessHours ? 'Salvataggio...' : 'Salva impostazioni' }}
+          </button>
+        </div>
       </div>
 
       <div class="panel-body hours-body">
-        <div class="business-hours-grid">
-          <div
-            class="business-day-card"
-            *ngFor="let hours of businessHours"
-            [class.closed]="!hours.aperto"
-          >
+        <div class="business-hours-grid" *ngIf="(businessHours$ | async) as businessHours">
+          <div class="business-day-card" *ngFor="let hours of businessHours" [class.closed]="!hours.aperto">
             <div class="day-card-header">
               <div>
                 <h3>{{ getDayName(hours.giorno) }}</h3>
@@ -412,27 +379,22 @@
             <div class="day-card-body">
               <label>
                 Orario di apertura
-                <input
-                  type="time"
-                  [value]="hours.apertura || ''"
-                  (change)="hours.apertura = $event.target.value"
-                  [disabled]="!hours.aperto"
-                />
+                <input type="time" [value]="hours.apertura || ''" (change)="hours.apertura = $event.target.value"
+                  [disabled]="!hours.aperto" />
               </label>
               <label>
                 Orario di chiusura
-                <input
-                  type="time"
-                  [value]="hours.chiusura || ''"
-                  (change)="hours.chiusura = $event.target.value"
-                  [disabled]="!hours.aperto"
-                />
+                <input type="time" [value]="hours.chiusura || ''" (change)="hours.chiusura = $event.target.value"
+                  [disabled]="!hours.aperto" />
               </label>
             </div>
           </div>
         </div>
         <p class="update-message" *ngIf="businessHoursMessage">{{ businessHoursMessage }}</p>
       </div>
+      <ng-template #loadingHours>
+        <p class="loading">Caricamento orari...</p>
+      </ng-template>
     </section>
   </main>
 </div>

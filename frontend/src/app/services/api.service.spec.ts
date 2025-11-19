@@ -37,7 +37,7 @@ describe('ApiService', () => {
         service: {} as Service,
         data: new Date('2022-01-01'),
         orarioInizio: '10:00',
-        stato: 'CONFIRMATO',
+        stato: 'CONFERMATO',
       },
       {
         id: 2,
@@ -46,7 +46,7 @@ describe('ApiService', () => {
         service: {} as Service,
         data: new Date('2022-01-02'),
         orarioInizio: '11:00',
-        stato: 'CONFIRMATO',
+        stato: 'CONFERMATO',
       },
     ];
 
