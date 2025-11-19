@@ -40,6 +40,27 @@ public class AppointmentsService {
 
     @Autowired
     private WaitingListRepository waitingListRepository;
+
+    @Autowired
+    private BusinessHoursRepository businessHoursRepository;
+
+    @Autowired
+    private NotificationService notificationService;
+
+    /**
+     * Create a new appointment if the slot is available.
+     */
+    @Transactional
+    public Appointments createAppointment(AppointmentRequest request) {
+        return createAppointment(request, true);
+    }
+
+    /**
+     * Internal method to create appointment with optional email notification.
+     */
+    private Appointments createAppointment(AppointmentRequest request, boolean sendEmail) {
+        if (!isSlotAvailable(request.getBarberId(), request.getData(), request.getOrarioInizio(), request.getServiceId())) {
+            throw new SlotNotAvailableException(request.getData(), request.getOrarioInizio());
         }
 
         Users customer = getEntityById(usersRepository, request.getCustomerId(), "Cliente non trovato");
@@ -54,7 +75,24 @@ public class AppointmentsService {
         appointment.setOrarioInizio(request.getOrarioInizio());
         appointment.setStato(Appointments.StatoAppuntamento.CONFERMATO);
 
-        return appointmentsRepository.save(appointment);
+        Appointments savedAppointment = appointmentsRepository.save(appointment);
+
+        // Send confirmation email only if requested
+        if (sendEmail) {
+            try {
+                notificationService.notifyAppointmentConfirmed(
+                    customer.getEmail(),
+                    customer.getNome() + " " + customer.getCognome(),
+                    savedAppointment.getData().toString(),
+                    savedAppointment.getOrarioInizio().toString()
+                );
+                logger.info("Confirmation email sent to {}", customer.getEmail());
+            } catch (Exception e) {
+                logger.warn("Failed to send confirmation email to {}: {}", customer.getEmail(), e.getMessage());
+            }
+        }
+
+        return savedAppointment;
     }
 
     private <T, ID> T getEntityById(JpaRepository<T, ID> repository, ID id, String errorMessage) {
@@ -164,11 +202,25 @@ public class AppointmentsService {
             appointmentRequest.setOrarioInizio(cancelledAppointment.getOrarioInizio());
 
             try {
-                createAppointment(appointmentRequest);
+                // Create appointment without sending confirmation email (we'll send slot assigned email instead)
+                createAppointment(appointmentRequest, false);
 
                 // Update the status in the waiting list
                 waitingEntry.setStato(WaitingList.StatoListaAttesa.CONFERMATO);
                 waitingListRepository.save(waitingEntry);
+                
+                // Send slot assigned email
+                try {
+                    notificationService.notifySlotAssigned(
+                        waitingEntry.getCustomer().getEmail(),
+                        waitingEntry.getCustomer().getNome() + " " + waitingEntry.getCustomer().getCognome(),
+                        cancelledAppointment.getData().toString(),
+                        cancelledAppointment.getOrarioInizio().toString()
+                    );
+                    logger.info("Slot assigned email sent to {}", waitingEntry.getCustomer().getEmail());
+                } catch (Exception e) {
+                    logger.warn("Failed to send slot assigned email: {}", e.getMessage());
+                }
                 
                 logger.info("Slot automatically assigned to customer {} for {} at {}", 
                     waitingEntry.getCustomer().getId(), 
