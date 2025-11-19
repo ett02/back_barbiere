@@ -2,8 +2,13 @@ package com.example.demo.service;
 
 import com.example.demo.dto.AppointmentRequest;
 import com.example.demo.dto.AvailableSlotResponse;
+import com.example.demo.exception.ResourceNotFoundException;
+import com.example.demo.exception.SlotNotAvailableException;
+import com.example.demo.exception.WaitingListProcessingException;
 import com.example.demo.model.*;
 import com.example.demo.repository.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
@@ -18,6 +23,8 @@ import java.util.Optional;
 
 @Service
 public class AppointmentsService {
+    
+    private static final Logger logger = LoggerFactory.getLogger(AppointmentsService.class);
 
     @Autowired
     private AppointmentsRepository appointmentsRepository;
@@ -33,20 +40,6 @@ public class AppointmentsService {
 
     @Autowired
     private WaitingListRepository waitingListRepository;
-
-    @Autowired
-    private BusinessHoursRepository businessHoursRepository;
-
-    /**
-     * Creates a new appointment.
-     *
-     * @param request the appointment request
-     * @return the created appointment
-     */
-    @Transactional
-    public Appointments createAppointment(AppointmentRequest request) {
-        if (!isSlotAvailable(request.getBarberId(), request.getData(), request.getOrarioInizio(), request.getServiceId())) {
-            throw new RuntimeException("Slot non disponibile");
         }
 
         Users customer = getEntityById(usersRepository, request.getCustomerId(), "Cliente non trovato");
@@ -65,7 +58,7 @@ public class AppointmentsService {
     }
 
     private <T, ID> T getEntityById(JpaRepository<T, ID> repository, ID id, String errorMessage) {
-        return repository.findById(id).orElseThrow(() -> new RuntimeException(errorMessage));
+        return repository.findById(id).orElseThrow(() -> new ResourceNotFoundException(errorMessage));
     }
 
     /**
@@ -119,7 +112,7 @@ public class AppointmentsService {
         Appointments appointment = getEntityById(appointmentsRepository, id, "Appuntamento non trovato");
 
         if (!isSlotAvailable(request.getBarberId(), request.getData(), request.getOrarioInizio(), request.getServiceId())) {
-            throw new RuntimeException("Slot non disponibile");
+            throw new SlotNotAvailableException(request.getData(), request.getOrarioInizio());
         }
 
         Barbers barber = getEntityById(barbersRepository, request.getBarberId(), "Barbiere non trovato");
@@ -141,7 +134,7 @@ public class AppointmentsService {
     @Transactional
     public void cancelAppointment(Long id) {
         Appointments appointment = appointmentsRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Appuntamento non trovato"));
+                .orElseThrow(() -> new ResourceNotFoundException("Appointment", id));
 
         appointment.setStato(Appointments.StatoAppuntamento.ANNULLATO);
         appointmentsRepository.save(appointment);
@@ -176,9 +169,22 @@ public class AppointmentsService {
                 // Update the status in the waiting list
                 waitingEntry.setStato(WaitingList.StatoListaAttesa.CONFERMATO);
                 waitingListRepository.save(waitingEntry);
+                
+                logger.info("Slot automatically assigned to customer {} for {} at {}", 
+                    waitingEntry.getCustomer().getId(), 
+                    cancelledAppointment.getData(),
+                    cancelledAppointment.getOrarioInizio());
 
+            } catch (SlotNotAvailableException e) {
+                logger.warn("Slot no longer available for waiting list entry {}: {}", 
+                    waitingEntry.getId(), e.getMessage());
+                waitingEntry.setStato(WaitingList.StatoListaAttesa.SCADUTO);
+                waitingListRepository.save(waitingEntry);
             } catch (Exception e) {
-                System.err.println("Error in the automatic assignment of the slot: " + e.getMessage());
+                logger.error("Failed to assign slot to waiting list entry {}", 
+                    waitingEntry.getId(), e);
+                throw new WaitingListProcessingException(
+                    "Failed to process waiting list", waitingEntry.getId(), e);
             }
         }
     }
@@ -202,7 +208,7 @@ public class AppointmentsService {
         }
 
         Services service = servicesRepository.findById(serviceId)
-                .orElseThrow(() -> new RuntimeException("Servizio non trovato"));
+                .orElseThrow(() -> new ResourceNotFoundException("Service", serviceId));
 
         int serviceDuration = service.getDurata();
         if (serviceDuration <= 0) {
@@ -233,7 +239,7 @@ public class AppointmentsService {
 
     private boolean isSlotAvailable(Long barberId, LocalDate date, LocalTime orarioInizio, Long serviceId) {
         Services service = servicesRepository.findById(serviceId)
-                .orElseThrow(() -> new RuntimeException("Servizio non trovato"));
+                .orElseThrow(() -> new ResourceNotFoundException("Service", serviceId));
 
         LocalTime orarioFine = orarioInizio.plusMinutes(service.getDurata());
 

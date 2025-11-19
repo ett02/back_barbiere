@@ -6,6 +6,8 @@ import com.example.demo.model.Users;
 import com.example.demo.service.AuthService;
 import com.example.demo.service.UserDetailsServiceImpl;
 import com.example.demo.util.JwtUtil;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/auth")
+@Tag(name = "Authentication", description = "Autenticazione e registrazione utenti")
 public class AuthController {
 
     @Autowired
@@ -33,11 +36,15 @@ public class AuthController {
     private JwtUtil jwtUtil;
 
     @PostMapping("/register")
+    @Operation(summary = "Registra nuovo utente", 
+               description = "Crea un nuovo account utente nel sistema")
     public Users register(@RequestBody Users user) {
         return authService.register(user);
     }
 
     @PostMapping("/login")
+    @Operation(summary = "Login utente",
+               description = "Autentica un utente e restituisce un token JWT")
     public ResponseEntity<?> createAuthenticationToken(@RequestBody AuthenticationRequest authenticationRequest) throws Exception {
         try {
             authenticationManager.authenticate(

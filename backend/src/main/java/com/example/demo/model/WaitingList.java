@@ -32,6 +32,9 @@ public class WaitingList {
 
     @Enumerated(EnumType.STRING)
     private StatoListaAttesa stato;
+    
+    @Version
+    private Long version;  // Optimistic locking to prevent race conditions
 
     public enum StatoListaAttesa {
         IN_ATTESA,
