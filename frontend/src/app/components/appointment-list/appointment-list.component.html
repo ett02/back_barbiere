@@ -1,12 +1,65 @@
-<div>
-  <h2>My Appointments</h2>
-  <ul>
-    <li *ngFor="let appointment of appointments$ | async">
-      <strong>Service:</strong> {{ appointment.service?.nome || 'N/D' }} <br />
-      <strong>Barber:</strong> {{ appointment.barber?.nome }} {{ appointment.barber?.cognome }} <br />
-      <strong>Date:</strong> {{ appointment.data | date: 'dd/MM/yyyy' }} <br />
-      <strong>Time:</strong> {{ appointment.orarioInizio }} <br />
-      <strong>Status:</strong> {{ appointment.stato }}
-    </li>
-  </ul>
+<div class="appointments-container">
+  <div class="header-section">
+    <h2>I Miei Appuntamenti</h2>
+
+    <!-- Filter Tabs -->
+    <div class="filter-tabs">
+      <button class="filter-chip" [class.active]="(selectedFilter$ | async) === 'UPCOMING'"
+        (click)="setFilter('UPCOMING')">
+        Da fare
+      </button>
+      <button class="filter-chip" [class.active]="(selectedFilter$ | async) === 'CANCELED'"
+        (click)="setFilter('CANCELED')">
+        Annullati
+      </button>
+      <button class="filter-chip" [class.active]="(selectedFilter$ | async) === 'PAST'" (click)="setFilter('PAST')">
+        Passati
+      </button>
+    </div>
+  </div>
+
+  <!-- Appointments List -->
+  <div class="appointments-grid">
+    <ng-container *ngIf="filteredAppointments$ | async as appointments">
+      <div *ngFor="let appointment of appointments" class="appointment-card">
+        <div class="appointment-header">
+          <span class="service-name">{{ appointment.service?.nome || 'Servizio' }}</span>
+          <span class="status-badge" [ngClass]="getAppointmentStatusClass(appointment)">
+            {{ appointment.stato }}
+          </span>
+        </div>
+
+        <div class="appointment-details">
+          <p>
+            <span>Barbiere:</span>
+            <strong>{{ appointment.barber?.nome }} {{ appointment.barber?.cognome }}</strong>
+          </p>
+          <p>
+            <span>Data:</span>
+            <strong>{{ appointment.data | date: 'dd/MM/yyyy' }}</strong>
+          </p>
+          <p>
+            <span>Ora:</span>
+            <strong>{{ appointment.orarioInizio }}</strong>
+          </p>
+          <p>
+            <span>Durata:</span>
+            <strong>{{ appointment.service?.durata }} min</strong>
+          </p>
+        </div>
+
+        <button *ngIf="(selectedFilter$ | async) === 'UPCOMING'" class="btn-cancel btn-danger"
+          (click)="cancelAppointment(appointment.id!)">
+          Cancella Appuntamento
+        </button>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="appointments.length === 0" class="empty-state">
+        <div class="empty-icon">📅</div>
+        <h3>Nessun appuntamento</h3>
+        <p>Non ci sono appuntamenti in questa categoria.</p>
+      </div>
+    </ng-container>
+  </div>
 </div>

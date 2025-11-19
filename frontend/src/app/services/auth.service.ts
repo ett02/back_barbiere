@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, BehaviorSubject } from 'rxjs';
 import { jwtDecode, JwtPayload } from 'jwt-decode';
 import { User } from '../models/user.model';
 
@@ -17,6 +17,12 @@ export class AuthService {
   private readonly tokenKey = 'token';
   private readonly roleKey = 'userRole';
   private readonly userIdKey = 'userId';
+
+  private loggedIn = new BehaviorSubject<boolean>(this.hasValidToken());
+  public isLoggedIn$ = this.loggedIn.asObservable();
+
+  private adminSubject = new BehaviorSubject<boolean>(this.checkIsAdmin());
+  public isAdmin$ = this.adminSubject.asObservable();
 
   login(credentials: { email: string; password: string }): Observable<{ jwt: string }> {
     return this.http.post<{ jwt: string }>(`${this.apiUrl}/login`, credentials);
@@ -52,6 +58,7 @@ export class AuthService {
       localStorage.removeItem(this.userIdKey);
     }
 
+    this.updateState();
     return decoded;
   }
 
@@ -73,26 +80,29 @@ export class AuthService {
 
   logout(): void {
     this.clearSession();
+    this.updateState();
   }
 
   isAdminAuthenticated(): boolean {
+    return this.checkIsAdmin();
+  }
+
+  private hasValidToken(): boolean {
     const token = this.getToken();
-    if (!token) {
-      return false;
-    }
-
+    if (!token) return false;
     const decoded = this.safeDecode(token);
-    if (!decoded) {
-      this.clearSession();
-      return false;
-    }
+    return !!decoded && !this.isExpired(decoded);
+  }
 
-    if (this.isExpired(decoded)) {
-      this.clearSession();
-      return false;
-    }
+  private checkIsAdmin(): boolean {
+    if (!this.hasValidToken()) return false;
+    const decoded = this.getDecodedToken();
+    return decoded?.role === 'ADMIN';
+  }
 
-    return decoded.role === 'ADMIN';
+  private updateState(): void {
+    this.loggedIn.next(this.hasValidToken());
+    this.adminSubject.next(this.checkIsAdmin());
   }
 
   private isExpired(decoded: DecodedToken): boolean {

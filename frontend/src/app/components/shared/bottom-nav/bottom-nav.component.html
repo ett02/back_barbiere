@@ -1,0 +1,33 @@
+<nav class="bottom-nav glass-panel" *ngIf="isLoggedIn$ | async">
+    <!-- Customer Links -->
+    <ng-container *ngIf="(isAdmin$ | async) === false">
+        <a routerLink="/customer-dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"
+            class="nav-item">
+            <span class="icon">🏠</span>
+            <span class="label">Home</span>
+        </a>
+        <a routerLink="/book" routerLinkActive="active" class="nav-item">
+            <span class="icon">✂️</span>
+            <span class="label">Prenota</span>
+        </a>
+        <a routerLink="/appointments" routerLinkActive="active" class="nav-item">
+            <span class="icon">📅</span>
+            <span class="label">Appuntamenti</span>
+        </a>
+    </ng-container>
+
+    <!-- Admin Links -->
+    <ng-container *ngIf="isAdmin$ | async">
+        <a routerLink="/admin-dashboard" routerLinkActive="active" class="nav-item">
+            <span class="icon">📊</span>
+            <span class="label">Dashboard</span>
+        </a>
+    </ng-container>
+
+    <!-- Common Profile/Logout -->
+    <!-- In a real app, this might go to a profile page. For now, maybe just a placeholder or logout -->
+    <a routerLink="/profile" routerLinkActive="active" class="nav-item">
+        <span class="icon">👤</span>
+        <span class="label">Profilo</span>
+    </a>
+</nav>

@@ -3,114 +3,128 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #f5f5dc 0%, #e8e8d0 100%);
   padding: var(--spacing-md);
+  /* Background is handled globally by body, but we can add a specific overlay if needed */
 }
 
 .login-card {
-  background: var(--color-white);
-  border-radius: var(--radius-xl);
-  padding: var(--spacing-xl);
-  box-shadow: var(--shadow-lg);
   width: 100%;
-  max-width: 450px;
-  animation: fadeInUp 0.5s ease;
+  max-width: 400px;
+  padding: var(--spacing-xl) var(--spacing-lg);
+
+  /* Glassmorphism applied via .glass-panel utility or directly here */
+  background: var(--color-surface);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--color-surface-border);
+  box-shadow: var(--glass-shadow);
+  border-radius: var(--radius-xl);
+
+  animation: fadeInUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.login-logo {
+  text-align: center;
+  margin-bottom: var(--spacing-xl);
+}
+
+.login-logo h1 {
+  font-size: 2.5rem;
+  color: var(--color-primary);
+  margin-bottom: var(--spacing-xs);
+  letter-spacing: -0.5px;
+}
+
+.login-logo p {
+  color: var(--color-text-secondary);
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.login-actions {
+  margin-top: var(--spacing-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.login-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+  margin: var(--spacing-sm) 0;
+}
+
+.login-divider::before,
+.login-divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.login-divider span {
+  padding: 0 var(--spacing-sm);
+}
+
+.login-footer {
+  text-align: center;
+  margin-top: var(--spacing-lg);
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.error-message {
+  background: rgba(211, 47, 47, 0.1);
+  color: var(--color-error);
+  padding: var(--spacing-sm);
+  border-radius: var(--radius-md);
+  text-align: center;
+  font-weight: 500;
+  font-size: 0.9rem;
+  border: 1px solid rgba(211, 47, 47, 0.2);
+  animation: shake 0.4s cubic-bezier(.36, .07, .19, .97) both;
 }
 
 @keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(40px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
   }
 }
 
-.login-logo {
-  text-align: center;
-  margin-bottom: var(--spacing-lg);
-}
-
-.login-logo h1 {
-  font-size: var(--font-size-h2);
-  color: var(--color-primary);
-  margin-bottom: var(--spacing-xs);
-}
-
-.login-logo p {
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-small);
-}
-
-.login-form {
-  margin-bottom: var(--spacing-md);
-}
-
-.login-actions {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-sm);
-}
-
-.login-divider {
-  text-align: center;
-  margin: var(--spacing-md) 0;
-  position: relative;
-}
-
-.login-divider::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 50%;
-  width: 100%;
-  height: 1px;
-  background: var(--color-border);
-}
-
-.login-divider span {
-  background: var(--color-white);
-  padding: 0 var(--spacing-sm);
-  position: relative;
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-small);
-}
-
-.login-footer {
-  text-align: center;
-  margin-top: var(--spacing-md);
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-small);
-}
-
-.error-message {
-  background: #ffebee;
-  color: var(--color-error);
-  padding: var(--spacing-sm);
-  border-radius: var(--radius-md);
-  margin-bottom: var(--spacing-md);
-  text-align: center;
-  font-size: var(--font-size-small);
-  animation: shake 0.3s;
-}
-
 @keyframes shake {
-  0%,
-  100% {
-    transform: translateX(0);
-  }
-  25% {
-    transform: translateX(-10px);
-  }
-  75% {
-    transform: translateX(10px);
-  }
-}
 
-@media (max-width: 768px) {
-  .login-card {
-    padding: var(--spacing-md);
+  10%,
+  90% {
+    transform: translate3d(-1px, 0, 0);
+  }
+
+  20%,
+  80% {
+    transform: translate3d(2px, 0, 0);
+  }
+
+  30%,
+  50%,
+  70% {
+    transform: translate3d(-4px, 0, 0);
+  }
+
+  40%,
+  60% {
+    transform: translate3d(4px, 0, 0);
   }
 }
