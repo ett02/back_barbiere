@@ -7,6 +7,7 @@ C:\repo_prog_barb\back_barbiere\backend\src\main\java\com\example\demo\controlle
 C:\repo_prog_barb\back_barbiere\backend\src\main\java\com\example\demo\controller\BarbersController.java
 C:\repo_prog_barb\back_barbiere\backend\src\main\java\com\example\demo\controller\BusinessHoursController.java
 C:\repo_prog_barb\back_barbiere\backend\src\main\java\com\example\demo\controller\ServicesController.java
+C:\repo_prog_barb\back_barbiere\backend\src\main\java\com\example\demo\controller\UserController.java
 C:\repo_prog_barb\back_barbiere\backend\src\main\java\com\example\demo\controller\WaitingListController.java
 C:\repo_prog_barb\back_barbiere\backend\src\main\java\com\example\demo\DemoApplication.java
 C:\repo_prog_barb\back_barbiere\backend\src\main\java\com\example\demo\dto\AppointmentRequest.java
@@ -16,6 +17,7 @@ C:\repo_prog_barb\back_barbiere\backend\src\main\java\com\example\demo\dto\Avail
 C:\repo_prog_barb\back_barbiere\backend\src\main\java\com\example\demo\dto\BarberAvailabilityRequest.java
 C:\repo_prog_barb\back_barbiere\backend\src\main\java\com\example\demo\dto\BarberServiceRequest.java
 C:\repo_prog_barb\back_barbiere\backend\src\main\java\com\example\demo\dto\UpdateBarberServicesRequest.java
+C:\repo_prog_barb\back_barbiere\backend\src\main\java\com\example\demo\dto\UserProfileDTO.java
 C:\repo_prog_barb\back_barbiere\backend\src\main\java\com\example\demo\dto\WaitingListRequest.java
 C:\repo_prog_barb\back_barbiere\backend\src\main\java\com\example\demo\filter\JwtRequestFilter.java
 C:\repo_prog_barb\back_barbiere\backend\src\main\java\com\example\demo\model\Appointments.java
@@ -42,5 +44,6 @@ C:\repo_prog_barb\back_barbiere\backend\src\main\java\com\example\demo\service\B
 C:\repo_prog_barb\back_barbiere\backend\src\main\java\com\example\demo\service\BusinessHoursService.java
 C:\repo_prog_barb\back_barbiere\backend\src\main\java\com\example\demo\service\ServicesService.java
 C:\repo_prog_barb\back_barbiere\backend\src\main\java\com\example\demo\service\UserDetailsServiceImpl.java
+C:\repo_prog_barb\back_barbiere\backend\src\main\java\com\example\demo\service\UserService.java
 C:\repo_prog_barb\back_barbiere\backend\src\main\java\com\example\demo\service\WaitingListService.java
 C:\repo_prog_barb\back_barbiere\backend\src\main\java\com\example\demo\util\JwtUtil.java

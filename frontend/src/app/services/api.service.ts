@@ -97,6 +97,12 @@ export class ApiService {
     return this.http.get<WaitingList[]>(`${this.apiUrl}/waiting-list/customer/${customerId}`);
   }
 
+  getAppointmentsByDate(date: string): Observable<Appointment[]> {
+    return this.http.get<Appointment[]>(`${this.apiUrl}/appointments/by-date`, {
+      params: { date },
+    });
+  }
+
   cancelAppointment(appointmentId: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/appointments/${appointmentId}`);
   }
@@ -105,17 +111,20 @@ export class ApiService {
     return this.http.delete<void>(`${this.apiUrl}/waiting-list/${waitingId}`);
   }
 
-  getAppointmentsByDate(date: string): Observable<Appointment[]> {
-    return this.http.get<Appointment[]>(`${this.apiUrl}/appointments/by-date`, {
-      params: { date },
-    });
-  }
-
   getBusinessHours(): Observable<BusinessHours[]> {
     return this.http.get<BusinessHours[]>(`${this.apiUrl}/business-hours`);
   }
 
   updateBusinessHours(hours: BusinessHours[]): Observable<BusinessHours[]> {
     return this.http.put<BusinessHours[]>(`${this.apiUrl}/business-hours`, hours);
+  }
+
+  // Profile
+  getProfile(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/users/profile`);
+  }
+
+  updateProfile(profileData: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/users/profile`, profileData);
   }
 }

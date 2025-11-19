@@ -25,6 +25,8 @@ public class Users {
 
     private String email;
 
+    private String telefono;
+
     private String password;
 
     @Enumerated(EnumType.STRING)

@@ -1,0 +1,70 @@
+<div class="profile-container">
+    <div class="profile-card">
+        <div class="profile-header">
+            <div class="avatar-circle">
+                {{ profileForm.get('nome')?.value?.charAt(0) || 'U' }}
+            </div>
+            <h2>Il Mio Profilo</h2>
+            <p class="subtitle">Gestisci le tue informazioni personali</p>
+        </div>
+
+        <form [formGroup]="profileForm" (ngSubmit)="onSubmit()" class="profile-form">
+
+            <!-- Nome -->
+            <div class="form-group">
+                <label for="nome">Nome</label>
+                <input id="nome" type="text" formControlName="nome" placeholder="Il tuo nome">
+                <div class="error-message" *ngIf="profileForm.get('nome')?.touched && profileForm.get('nome')?.invalid">
+                    Il nome è obbligatorio.
+                </div>
+            </div>
+
+            <!-- Cognome -->
+            <div class="form-group">
+                <label for="cognome">Cognome</label>
+                <input id="cognome" type="text" formControlName="cognome" placeholder="Il tuo cognome">
+                <div class="error-message"
+                    *ngIf="profileForm.get('cognome')?.touched && profileForm.get('cognome')?.invalid">
+                    Il cognome è obbligatorio.
+                </div>
+            </div>
+
+            <!-- Email (Disabled) -->
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input id="email" type="email" formControlName="email" class="disabled-input">
+                <small class="helper-text">L'email non può essere modificata.</small>
+            </div>
+
+            <!-- Telefono -->
+            <div class="form-group">
+                <label for="telefono">Telefono</label>
+                <input id="telefono" type="tel" formControlName="telefono" placeholder="Es. 3331234567">
+                <div class="error-message"
+                    *ngIf="profileForm.get('telefono')?.touched && profileForm.get('telefono')?.invalid">
+                    Inserisci un numero di telefono valido (10 cifre).
+                </div>
+            </div>
+
+            <!-- Messages -->
+            <div class="alert alert-success" *ngIf="successMessage">
+                {{ successMessage }}
+            </div>
+            <div class="alert alert-error" *ngIf="errorMessage">
+                {{ errorMessage }}
+            </div>
+
+            <!-- Actions -->
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary" [disabled]="profileForm.invalid || isLoading">
+                    <span *ngIf="!isLoading">💾 Salva Modifiche</span>
+                    <span *ngIf="isLoading">⏳ Salvataggio...</span>
+                </button>
+
+                <button type="button" class="btn btn-secondary btn-logout" (click)="logout()">
+                    🚪 Logout
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
