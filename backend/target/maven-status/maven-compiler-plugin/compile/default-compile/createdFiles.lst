@@ -33,6 +33,7 @@ com\example\demo\controller\BusinessHoursController.class
 com\example\demo\DemoApplication.class
 com\example\demo\repository\AppointmentsRepository.class
 com\example\demo\service\BarberService.class
+com\example\demo\controller\TestEmailController.class
 com\example\demo\dto\BarberServiceRequest.class
 com\example\demo\dto\UpdateBarberServicesRequest.class
 com\example\demo\service\NotificationServiceStub.class
