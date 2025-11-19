@@ -1,7 +1,7 @@
 <div>
   <h2>My Appointments</h2>
   <ul>
-    <li *ngFor="let appointment of appointments">
+    <li *ngFor="let appointment of appointments$ | async">
       <strong>Service:</strong> {{ appointment.service?.nome || 'N/D' }} <br />
       <strong>Barber:</strong> {{ appointment.barber?.nome }} {{ appointment.barber?.cognome }} <br />
       <strong>Date:</strong> {{ appointment.data | date: 'dd/MM/yyyy' }} <br />

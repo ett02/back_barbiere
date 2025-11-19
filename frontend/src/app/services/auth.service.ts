@@ -4,13 +4,15 @@ import { Observable } from 'rxjs';
 import { jwtDecode, JwtPayload } from 'jwt-decode';
 import { User } from '../models/user.model';
 
+import { environment } from '../../environments/environment';
+
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
   private http = inject(HttpClient);
 
-  private apiUrl = 'http://localhost:8080/auth';
+  private apiUrl = `${environment.apiUrl}/auth`;
 
   private readonly tokenKey = 'token';
   private readonly roleKey = 'userRole';
