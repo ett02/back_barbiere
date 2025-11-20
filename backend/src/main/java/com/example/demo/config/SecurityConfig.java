@@ -35,6 +35,8 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/auth/**").permitAll()
+                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                .requestMatchers("/api/test/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/services/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/barbers/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/business-hours/**").permitAll()

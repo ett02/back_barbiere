@@ -38,14 +38,14 @@ public class EmailNotificationService implements NotificationService {
     @Override
     public void notifySlotAssigned(String customerEmail, String customerName, 
                                   String appointmentDate, String appointmentTime) {
-        if (!mailEnabled) {
-            logger.info("📧 [EMAIL DISABLED] Slot assigned to {} ({}): {} at {}", 
-                customerName, customerEmail, appointmentDate, appointmentTime);
-            return;
-        }
-        
         String subject = "🎉 Slot Disponibile Assegnato - Barber Shop";
         String htmlContent = buildSlotAssignedEmail(customerName, appointmentDate, appointmentTime);
+
+        if (!mailEnabled) {
+            logger.info("📧 [EMAIL DISABLED] Saving email to file instead of sending...");
+            saveEmailToFile(customerEmail, subject, htmlContent);
+            return;
+        }
         
         sendEmail(customerEmail, subject, htmlContent);
         logger.info("📧 [EMAIL SENT] Slot assigned notification sent to {}", customerEmail);
@@ -54,14 +54,14 @@ public class EmailNotificationService implements NotificationService {
     @Override
     public void notifyAppointmentConfirmed(String customerEmail, String customerName,
                                           String appointmentDate, String appointmentTime) {
-        if (!mailEnabled) {
-            logger.info("📧 [EMAIL DISABLED] Appointment confirmed for {} ({}): {} at {}",
-                customerName, customerEmail, appointmentDate, appointmentTime);
-            return;
-        }
-        
         String subject = "✅ Appuntamento Confermato - Barber Shop";
         String htmlContent = buildAppointmentConfirmedEmail(customerName, appointmentDate, appointmentTime);
+
+        if (!mailEnabled) {
+            logger.info("📧 [EMAIL DISABLED] Saving email to file instead of sending...");
+            saveEmailToFile(customerEmail, subject, htmlContent);
+            return;
+        }
         
         sendEmail(customerEmail, subject, htmlContent);
         logger.info("📧 [EMAIL SENT] Appointment confirmation sent to {}", customerEmail);
@@ -69,14 +69,14 @@ public class EmailNotificationService implements NotificationService {
     
     @Override
     public void notifyAppointmentCancelled(String customerEmail, String customerName) {
-        if (!mailEnabled) {
-            logger.info("📧 [EMAIL DISABLED] Appointment cancelled for {} ({})",
-                customerName, customerEmail);
-            return;
-        }
-        
         String subject = "❌ Appuntamento Cancellato - Barber Shop";
         String htmlContent = buildAppointmentCancelledEmail(customerName);
+
+        if (!mailEnabled) {
+            logger.info("📧 [EMAIL DISABLED] Saving email to file instead of sending...");
+            saveEmailToFile(customerEmail, subject, htmlContent);
+            return;
+        }
         
         sendEmail(customerEmail, subject, htmlContent);
         logger.info("📧 [EMAIL SENT] Cancellation notification sent to {}", customerEmail);
@@ -84,19 +84,45 @@ public class EmailNotificationService implements NotificationService {
     
     @Override
     public void notifyWaitingListPosition(String customerEmail, String customerName, int position) {
-        if (!mailEnabled) {
-            logger.info("📧 [EMAIL DISABLED] Waiting list position for {} ({}): {}",
-                customerName, customerEmail, position);
-            return;
-        }
-        
         String subject = "📋 Posizione in Lista d'Attesa - Barber Shop";
         String htmlContent = buildWaitingListPositionEmail(customerName, position);
+
+        if (!mailEnabled) {
+            logger.info("📧 [EMAIL DISABLED] Saving email to file instead of sending...");
+            saveEmailToFile(customerEmail, subject, htmlContent);
+            return;
+        }
         
         sendEmail(customerEmail, subject, htmlContent);
         logger.info("📧 [EMAIL SENT] Waiting list position sent to {}", customerEmail);
     }
     
+    /**
+     * Save email to a local HTML file for testing
+     */
+    private void saveEmailToFile(String to, String subject, String htmlContent) {
+        try {
+            // Create directory if not exists
+            java.nio.file.Path dir = java.nio.file.Paths.get("sent_emails");
+            if (!java.nio.file.Files.exists(dir)) {
+                java.nio.file.Files.createDirectories(dir);
+            }
+            
+            // Create filename with timestamp
+            String timestamp = java.time.LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+            String safeSubject = subject.replaceAll("[^a-zA-Z0-9]", "_");
+            String filename = String.format("email_%s_%s.html", timestamp, safeSubject);
+            
+            java.nio.file.Path file = dir.resolve(filename);
+            java.nio.file.Files.writeString(file, htmlContent);
+            
+            logger.info("📁 [FILE SAVED] Email saved to: {}", file.toAbsolutePath());
+            
+        } catch (Exception e) {
+            logger.error("Failed to save email to file", e);
+        }
+    }
+
     /**
      * Send HTML email
      */
