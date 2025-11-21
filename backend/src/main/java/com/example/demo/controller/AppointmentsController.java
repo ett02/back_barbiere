@@ -46,14 +46,32 @@ public class AppointmentsController {
         return ResponseEntity.ok(appointmentsService.createAppointment(request));
     }
 
+    @Autowired
+    private com.example.demo.repository.UsersRepository usersRepository;
+
     @GetMapping("/user/{userId}")
     @Operation(summary = "Ottieni appuntamenti per utente",
                description = "Restituisce tutti gli appuntamenti di un cliente specifico")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Lista appuntamenti recuperata")
+        @ApiResponse(responseCode = "200", description = "Lista appuntamenti recuperata"),
+        @ApiResponse(responseCode = "403", description = "Accesso negato")
     })
-    public List<Appointments> getAppointmentsByUser(@PathVariable Long userId) {
-        return appointmentsService.getAppointmentsByUser(userId);
+    public ResponseEntity<List<Appointments>> getAppointmentsByUser(@PathVariable Long userId) {
+        org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        String currentUsername = auth.getName();
+        boolean isAdmin = auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ADMIN"));
+
+        if (!isAdmin) {
+            com.example.demo.model.Users currentUser = usersRepository.findByEmail(currentUsername)
+                    .orElseThrow(() -> new com.example.demo.exception.ResourceNotFoundException("User not found"));
+            
+            if (!currentUser.getId().equals(userId)) {
+                return ResponseEntity.status(403).build();
+            }
+        }
+        
+        return ResponseEntity.ok(appointmentsService.getAppointmentsByUser(userId));
     }
 
     @GetMapping("/barber/{barberId}")

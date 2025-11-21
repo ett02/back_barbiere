@@ -8,7 +8,6 @@ F:\back_barbiere\backend\src\main\java\com\example\demo\controller\BarberControl
 F:\back_barbiere\backend\src\main\java\com\example\demo\controller\BarbersController.java
 F:\back_barbiere\backend\src\main\java\com\example\demo\controller\BusinessHoursController.java
 F:\back_barbiere\backend\src\main\java\com\example\demo\controller\ServicesController.java
-F:\back_barbiere\backend\src\main\java\com\example\demo\controller\TestEmailController.java
 F:\back_barbiere\backend\src\main\java\com\example\demo\controller\UserController.java
 F:\back_barbiere\backend\src\main\java\com\example\demo\controller\WaitingListController.java
 F:\back_barbiere\backend\src\main\java\com\example\demo\DemoApplication.java
@@ -21,6 +20,7 @@ F:\back_barbiere\backend\src\main\java\com\example\demo\dto\BarberServiceRequest
 F:\back_barbiere\backend\src\main\java\com\example\demo\dto\ErrorResponse.java
 F:\back_barbiere\backend\src\main\java\com\example\demo\dto\UpdateBarberServicesRequest.java
 F:\back_barbiere\backend\src\main\java\com\example\demo\dto\UserProfileDTO.java
+F:\back_barbiere\backend\src\main\java\com\example\demo\dto\UserResponseDTO.java
 F:\back_barbiere\backend\src\main\java\com\example\demo\dto\ValidationErrorResponse.java
 F:\back_barbiere\backend\src\main\java\com\example\demo\dto\WaitingListRequest.java
 F:\back_barbiere\backend\src\main\java\com\example\demo\exception\GlobalExceptionHandler.java
@@ -52,7 +52,6 @@ F:\back_barbiere\backend\src\main\java\com\example\demo\service\BarbersService.j
 F:\back_barbiere\backend\src\main\java\com\example\demo\service\BusinessHoursService.java
 F:\back_barbiere\backend\src\main\java\com\example\demo\service\EmailNotificationService.java
 F:\back_barbiere\backend\src\main\java\com\example\demo\service\NotificationService.java
-F:\back_barbiere\backend\src\main\java\com\example\demo\service\NotificationServiceStub.java
 F:\back_barbiere\backend\src\main\java\com\example\demo\service\ServicesService.java
 F:\back_barbiere\backend\src\main\java\com\example\demo\service\UserDetailsServiceImpl.java
 F:\back_barbiere\backend\src\main\java\com\example\demo\service\UserService.java

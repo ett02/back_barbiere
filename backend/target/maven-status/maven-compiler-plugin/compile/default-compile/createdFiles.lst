@@ -33,10 +33,9 @@ com\example\demo\controller\BusinessHoursController.class
 com\example\demo\DemoApplication.class
 com\example\demo\repository\AppointmentsRepository.class
 com\example\demo\service\BarberService.class
-com\example\demo\controller\TestEmailController.class
+com\example\demo\dto\UserResponseDTO.class
 com\example\demo\dto\BarberServiceRequest.class
 com\example\demo\dto\UpdateBarberServicesRequest.class
-com\example\demo\service\NotificationServiceStub.class
 com\example\demo\controller\WaitingListController.class
 com\example\demo\exception\ResourceNotFoundException.class
 com\example\demo\service\AvailabilityService.class

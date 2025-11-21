@@ -1,0 +1,12 @@
+# Secrets
+application-secrets.properties
+backend/src/main/resources/application-secrets.properties
+
+# Java/Maven
+target/
+*.class
+
+# IDE
+.vscode/
+.idea/
+*.iml

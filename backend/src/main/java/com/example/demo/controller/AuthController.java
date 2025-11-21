@@ -38,8 +38,9 @@ public class AuthController {
     @PostMapping("/register")
     @Operation(summary = "Registra nuovo utente", 
                description = "Crea un nuovo account utente nel sistema")
-    public Users register(@RequestBody Users user) {
-        return authService.register(user);
+    public com.example.demo.dto.UserResponseDTO register(@RequestBody Users user) {
+        Users registeredUser = authService.register(user);
+        return new com.example.demo.dto.UserResponseDTO(registeredUser);
     }
 
     @PostMapping("/login")

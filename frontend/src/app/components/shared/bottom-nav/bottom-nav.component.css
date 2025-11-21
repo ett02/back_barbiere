@@ -47,10 +47,3 @@
 .nav-item:active {
     transform: scale(0.95);
 }
-
-/* Hide on Desktop */
-@media (min-width: 769px) {
-    .bottom-nav {
-        display: none;
-    }
-}
