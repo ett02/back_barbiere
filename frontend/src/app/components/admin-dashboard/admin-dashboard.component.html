@@ -348,52 +348,62 @@
 
     <!-- Orari di apertura -->
     <section class="panel" *ngIf="selectedSection === 'settings'">
-      <div class="section-header">
-        <div>
-          <h2>Orari di apertura</h2>
-          <p>Definisci giorni di chiusura e fasce orarie di lavoro.</p>
-        </div>
-        <div *ngIf="(businessHours$ | async) as businessHours; else loadingHours">
-          <button type="button" class="btn primary" (click)="saveBusinessHours(businessHours)"
-            [disabled]="isSavingBusinessHours">
-            {{ isSavingBusinessHours ? 'Salvataggio...' : 'Salva impostazioni' }}
-          </button>
-        </div>
-      </div>
-
-      <div class="panel-body hours-body">
-        <div class="business-hours-grid" *ngIf="(businessHours$ | async) as businessHours">
-          <div class="business-day-card" *ngFor="let hours of businessHours" [class.closed]="!hours.aperto">
-            <div class="day-card-header">
-              <div>
-                <h3>{{ getDayName(hours.giorno) }}</h3>
-                <span class="status-pill" [class.open]="hours.aperto" [class.closed]="!hours.aperto">
-                  {{ hours.aperto ? 'Aperto' : 'Chiuso' }}
-                </span>
-              </div>
-              <button type="button" class="btn toggle" (click)="toggleDayOpen(hours)">
-                {{ hours.aperto ? 'Imposta come chiuso' : 'Imposta come aperto' }}
-              </button>
-            </div>
-
-            <div class="day-card-body">
-              <label>
-                Orario di apertura
-                <input type="time" [value]="hours.apertura || ''" (change)="hours.apertura = $event.target.value"
-                  [disabled]="!hours.aperto" />
-              </label>
-              <label>
-                Orario di chiusura
-                <input type="time" [value]="hours.chiusura || ''" (change)="hours.chiusura = $event.target.value"
-                  [disabled]="!hours.aperto" />
-              </label>
-            </div>
+      <ng-container *ngIf="(businessHours$ | async) as businessHours; else loadingHours">
+        <div class="section-header">
+          <div>
+            <h2>Orari di apertura</h2>
+            <p>Definisci giorni di chiusura e fasce orarie di lavoro.</p>
+          </div>
+          <div>
+            <button type="button" class="btn primary" (click)="saveBusinessHours(businessHours)"
+              [disabled]="isSavingBusinessHours">
+              {{ isSavingBusinessHours ? 'Salvataggio...' : 'Salva impostazioni' }}
+            </button>
           </div>
         </div>
-        <p class="update-message" *ngIf="businessHoursMessage">{{ businessHoursMessage }}</p>
-      </div>
+
+        <div class="panel-body hours-body">
+          <div class="business-hours-grid">
+            <div class="business-day-card" *ngFor="let hours of businessHours" [class.closed]="!hours.aperto">
+              <div class="day-card-header">
+                <div>
+                  <h3>{{ getDayName(hours.giorno) }}</h3>
+                  <span class="status-pill" [class.open]="hours.aperto" [class.closed]="!hours.aperto">
+                    {{ hours.aperto ? 'Aperto' : 'Chiuso' }}
+                  </span>
+                </div>
+                <button type="button" class="btn toggle" (click)="toggleDayOpen(hours)">
+                  {{ hours.aperto ? 'Imposta come chiuso' : 'Imposta come aperto' }}
+                </button>
+              </div>
+
+              <div class="day-card-body">
+                <label>
+                  Orario di apertura
+                  <input type="time" [value]="hours.apertura || ''" (change)="hours.apertura = $event.target.value"
+                    [disabled]="!hours.aperto" />
+                </label>
+                <label>
+                  Orario di chiusura
+                  <input type="time" [value]="hours.chiusura || ''" (change)="hours.chiusura = $event.target.value"
+                    [disabled]="!hours.aperto" />
+                </label>
+              </div>
+            </div>
+          </div>
+          <p class="update-message" *ngIf="businessHoursMessage">{{ businessHoursMessage }}</p>
+        </div>
+      </ng-container>
       <ng-template #loadingHours>
-        <p class="loading">Caricamento orari...</p>
+        <div class="section-header">
+          <div>
+            <h2>Orari di apertura</h2>
+            <p>Definisci giorni di chiusura e fasce orarie di lavoro.</p>
+          </div>
+        </div>
+        <div class="panel-body">
+          <p class="loading">Caricamento orari...</p>
+        </div>
       </ng-template>
     </section>
   </main>
