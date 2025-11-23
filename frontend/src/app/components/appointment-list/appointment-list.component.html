@@ -7,7 +7,7 @@
       <button
         class="px-5 py-2 rounded-full border border-gray-100 bg-white/50 text-text-secondary font-semibold text-sm whitespace-nowrap transition-all"
         [class.bg-primary]="(selectedFilter$ | async) === 'UPCOMING'"
-        [class.text-white]="(selectedFilter$ | async) === 'UPCOMING'"
+        [class.text-black]="(selectedFilter$ | async) === 'UPCOMING'"
         [class.border-primary]="(selectedFilter$ | async) === 'UPCOMING'"
         [class.shadow-primary]="(selectedFilter$ | async) === 'UPCOMING'" (click)="setFilter('UPCOMING')">
         Da fare
@@ -15,7 +15,7 @@
       <button
         class="px-5 py-2 rounded-full border border-gray-100 bg-white/50 text-text-secondary font-semibold text-sm whitespace-nowrap transition-all"
         [class.bg-primary]="(selectedFilter$ | async) === 'CANCELED'"
-        [class.text-white]="(selectedFilter$ | async) === 'CANCELED'"
+        [class.text-black]="(selectedFilter$ | async) === 'CANCELED'"
         [class.border-primary]="(selectedFilter$ | async) === 'CANCELED'"
         [class.shadow-primary]="(selectedFilter$ | async) === 'CANCELED'" (click)="setFilter('CANCELED')">
         Annullati
@@ -23,7 +23,7 @@
       <button
         class="px-5 py-2 rounded-full border border-gray-100 bg-white/50 text-text-secondary font-semibold text-sm whitespace-nowrap transition-all"
         [class.bg-primary]="(selectedFilter$ | async) === 'PAST'"
-        [class.text-white]="(selectedFilter$ | async) === 'PAST'"
+        [class.text-black]="(selectedFilter$ | async) === 'PAST'"
         [class.border-primary]="(selectedFilter$ | async) === 'PAST'"
         [class.shadow-primary]="(selectedFilter$ | async) === 'PAST'" (click)="setFilter('PAST')">
         Passati

@@ -1,12 +1,12 @@
 <div class="min-h-screen bg-background lg:flex">
   <!-- Mobile Header -->
-  <div class="lg:hidden flex items-center justify-between p-4 bg-white shadow-sm sticky top-0 z-20">
-    <div class="flex items-center gap-2">
-      <h1 class="text-xl font-bold text-primary font-heading">Dashboard</h1>
-    </div>
+  <div class="lg:hidden flex items-center p-4 bg-white shadow-sm sticky top-0 z-20 gap-3">
     <button class="p-2 rounded-lg hover:bg-gray-100 text-text-primary" (click)="toggleSidebar()">
       <span class="text-2xl">☰</span>
     </button>
+    <div class="flex items-center gap-2">
+      <h1 class="text-xl font-bold text-primary font-heading">Dashboard</h1>
+    </div>
   </div>
 
   <!-- Sidebar Overlay -->
@@ -17,9 +17,14 @@
   <aside
     class="fixed inset-y-0 left-0 z-40 w-64 bg-white shadow-xl transform transition-transform duration-300 lg:translate-x-0 lg:static lg:shadow-none flex flex-col"
     [class.-translate-x-full]="!isSidebarOpen">
-    <div class="p-6 border-b border-gray-100">
-      <h1 class="text-2xl font-bold text-primary font-heading mb-1">Dashboard</h1>
-      <p class="text-sm text-text-secondary font-medium">Gestisci il tuo barber shop</p>
+    <div class="p-6 border-b border-gray-100 flex justify-between items-start">
+      <div>
+        <h1 class="text-2xl font-bold text-primary font-heading mb-1">Dashboard</h1>
+        <p class="text-sm text-text-secondary font-medium">Gestisci il tuo barber shop</p>
+      </div>
+      <button class="lg:hidden p-1 rounded-full hover:bg-gray-100 text-text-secondary" (click)="toggleSidebar()">
+        <span class="text-xl">✕</span>
+      </button>
     </div>
     <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
       <button type="button"
