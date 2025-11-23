@@ -1,41 +1,55 @@
-<div class="dashboard-container">
-  <header class="dashboard-header">
-    <div class="dashboard-user">
-      <span class="user-icon">👤</span>
-      <span class="user-name">{{ customerName }}</span>
+<div class="min-h-screen pb-20 bg-background">
+  <header
+    class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 px-4 py-3 flex justify-between items-center shadow-sm">
+    <div class="flex items-center gap-3 text-text-primary font-semibold">
+      <div class="w-10 h-10 rounded-full bg-primary-light flex items-center justify-center text-xl">👤</div>
+      <span class="font-heading">{{ customerName }}</span>
     </div>
-    <button class="btn btn-secondary logout-button" (click)="logout()">
-      🚪 Logout
+    <button
+      class="px-4 py-2 text-sm font-medium text-text-secondary hover:text-primary transition-colors flex items-center gap-2"
+      (click)="logout()">
+      <span>🚪</span> <span class="hidden sm:inline">Logout</span>
     </button>
   </header>
 
   <!-- Hero Section con Benvenuto -->
-  <section class="hero-section">
-    <div class="hero-content">
-      <h1 class="welcome-title">💈 Benvenuto, {{ customerName }}!</h1>
-      <p class="welcome-subtitle">
+  <section
+    class="mx-4 mt-6 p-8 rounded-3xl bg-gradient-to-br from-primary to-primary-active text-white text-center shadow-primary animate-[fadeInUp_0.6s_ease-out]">
+    <div class="max-w-2xl mx-auto">
+      <h1 class="text-3xl md:text-4xl font-bold mb-3 font-heading">💈 Benvenuto, {{ customerName }}!</h1>
+      <p class="opacity-90 mb-8 text-base md:text-lg font-medium">
         Prenota il tuo taglio perfetto con i migliori barbieri della città
       </p>
-      <button class="btn btn-primary btn-large" (click)="navigateToBooking()">
+      <button
+        class="px-8 py-4 bg-white text-primary font-bold rounded-full shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2 mx-auto"
+        (click)="navigateToBooking()">
         📅 Prenota Ora
       </button>
     </div>
   </section>
 
   <!-- Lista d'Attesa -->
-  <section class="waiting-list-section" *ngIf="(waitingList$ | async) as waitingList">
+  <section class="max-w-5xl mx-auto px-4 mt-10" *ngIf="(waitingList$ | async) as waitingList">
     <ng-container *ngIf="waitingList.length > 0">
-      <h2>⏳ Lista d'Attesa</h2>
-      <div class="waiting-list-cards">
-        <div class="waiting-card" *ngFor="let waiting of waitingList; let i = index">
-          <div class="waiting-header">
-            <span class="waiting-service">{{ getServiceName(waiting.service) }}</span>
-            <span class="position-badge">Posizione: {{ i + 1 }}</span>
+      <h2 class="text-xl font-bold text-text-primary mb-4 flex items-center gap-2">
+        <span>⏳</span> Lista d'Attesa
+      </h2>
+      <div class="flex flex-col gap-4">
+        <div class="bg-white border-l-4 border-primary rounded-xl p-5 shadow-sm relative overflow-hidden"
+          *ngFor="let waiting of waitingList; let i = index">
+          <div class="flex justify-between items-start mb-3">
+            <span class="font-bold text-lg text-text-primary">{{ getServiceName(waiting.service) }}</span>
+            <span class="bg-primary text-white px-2 py-1 rounded text-xs font-bold">Posizione: {{ i + 1 }}</span>
           </div>
-          <p><strong>Barbiere:</strong> {{ getBarberFullName(waiting.barber) }}</p>
-          <p><strong>Data Richiesta:</strong> {{ waiting.dataRichiesta | date: 'dd/MM/yyyy' }}</p>
-          <p class="waiting-status">{{ getWaitingStatusMessage(waiting) }}</p>
-          <button class="btn btn-outline" (click)="removeFromWaitingList(waiting.id)">
+          <div class="text-sm text-text-secondary space-y-1">
+            <p><strong class="text-text-primary">Barbiere:</strong> {{ getBarberFullName(waiting.barber) }}</p>
+            <p><strong class="text-text-primary">Data Richiesta:</strong> {{ waiting.dataRichiesta | date: 'dd/MM/yyyy'
+              }}</p>
+            <p class="font-medium text-primary mt-2">{{ getWaitingStatusMessage(waiting) }}</p>
+          </div>
+          <button
+            class="mt-4 w-full sm:w-auto px-4 py-2 border border-error text-error rounded-lg text-sm font-medium hover:bg-red-50 transition-colors flex items-center justify-center gap-2"
+            (click)="removeFromWaitingList(waiting.id)">
             🗑️ Rimuovi dalla Coda
           </button>
         </div>
@@ -44,48 +58,50 @@
   </section>
 
   <!-- Perché Scegliere Noi -->
-  <section class="why-choose-us">
-    <h2>✨ Perché Scegliere la Nostra Barberia</h2>
-    <div class="features-grid">
-      <div class="feature-card">
-        <div class="feature-icon">👨‍💼</div>
-        <h3>Barbieri Esperti</h3>
-        <p>Professionisti con oltre 10 anni di esperienza nel settore</p>
+  <section class="max-w-5xl mx-auto px-4 mt-12">
+    <h2 class="text-xl font-bold text-center text-text-primary mb-8">✨ Perché Scegliere la Nostra Barberia</h2>
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+      <div class="bg-white/60 p-6 rounded-2xl text-center border border-gray-50 shadow-sm backdrop-blur-sm">
+        <div class="text-3xl mb-3">👨‍💼</div>
+        <h3 class="font-bold text-text-primary mb-2 text-sm md:text-base">Barbieri Esperti</h3>
+        <p class="text-xs text-text-secondary leading-relaxed">Professionisti con oltre 10 anni di esperienza</p>
       </div>
-      <div class="feature-card">
-        <div class="feature-icon">⏰</div>
-        <h3>Prenotazione Online</h3>
-        <p>Prenota quando vuoi, 24/7, con conferma immediata</p>
+      <div class="bg-white/60 p-6 rounded-2xl text-center border border-gray-50 shadow-sm backdrop-blur-sm">
+        <div class="text-3xl mb-3">⏰</div>
+        <h3 class="font-bold text-text-primary mb-2 text-sm md:text-base">Prenotazione Online</h3>
+        <p class="text-xs text-text-secondary leading-relaxed">Prenota quando vuoi, 24/7, con conferma immediata</p>
       </div>
-      <div class="feature-card">
-        <div class="feature-icon">💎</div>
-        <h3>Servizi Premium</h3>
-        <p>Prodotti di alta qualità e trattamenti personalizzati</p>
+      <div class="bg-white/60 p-6 rounded-2xl text-center border border-gray-50 shadow-sm backdrop-blur-sm">
+        <div class="text-3xl mb-3">💎</div>
+        <h3 class="font-bold text-text-primary mb-2 text-sm md:text-base">Servizi Premium</h3>
+        <p class="text-xs text-text-secondary leading-relaxed">Prodotti di alta qualità e trattamenti personalizzati</p>
       </div>
-      <div class="feature-card">
-        <div class="feature-icon">🏆</div>
-        <h3>Miglior Prezzo</h3>
-        <p>Qualità superiore a prezzi competitivi e convenienti</p>
+      <div class="bg-white/60 p-6 rounded-2xl text-center border border-gray-50 shadow-sm backdrop-blur-sm">
+        <div class="text-3xl mb-3">🏆</div>
+        <h3 class="font-bold text-text-primary mb-2 text-sm md:text-base">Miglior Prezzo</h3>
+        <p class="text-xs text-text-secondary leading-relaxed">Qualità superiore a prezzi competitivi</p>
       </div>
-      <div class="feature-card">
-        <div class="feature-icon">🎯</div>
-        <h3>Stile su Misura</h3>
-        <p>Consulenza personalizzata per il taglio perfetto per te</p>
+      <div class="bg-white/60 p-6 rounded-2xl text-center border border-gray-50 shadow-sm backdrop-blur-sm">
+        <div class="text-3xl mb-3">🎯</div>
+        <h3 class="font-bold text-text-primary mb-2 text-sm md:text-base">Stile su Misura</h3>
+        <p class="text-xs text-text-secondary leading-relaxed">Consulenza personalizzata per il taglio perfetto</p>
       </div>
-      <div class="feature-card">
-        <div class="feature-icon">🔔</div>
-        <h3>Lista d'Attesa</h3>
-        <p>Sistema FIFO automatico se il giorno è pieno</p>
+      <div class="bg-white/60 p-6 rounded-2xl text-center border border-gray-50 shadow-sm backdrop-blur-sm">
+        <div class="text-3xl mb-3">🔔</div>
+        <h3 class="font-bold text-text-primary mb-2 text-sm md:text-base">Lista d'Attesa</h3>
+        <p class="text-xs text-text-secondary leading-relaxed">Sistema FIFO automatico se il giorno è pieno</p>
       </div>
     </div>
   </section>
 
   <!-- Call to Action Finale -->
-  <section class="cta-section">
-    <div class="cta-content">
-      <h2>🚀 Pronto per il Tuo Nuovo Look?</h2>
-      <p>Prenota ora e vivi l'esperienza della migliore barberia della città!</p>
-      <button class="btn btn-primary btn-large" (click)="navigateToBooking()">
+  <section class="text-center py-12 px-4 mb-10">
+    <div class="max-w-2xl mx-auto">
+      <h2 class="text-2xl font-bold text-text-primary mb-3">🚀 Pronto per il Tuo Nuovo Look?</h2>
+      <p class="text-text-secondary mb-8">Prenota ora e vivi l'esperienza della migliore barberia della città!</p>
+      <button
+        class="w-full sm:w-auto px-8 py-4 bg-primary text-white font-bold rounded-full shadow-primary hover:bg-primary-hover active:scale-95 transition-all flex items-center justify-center gap-2 mx-auto"
+        (click)="navigateToBooking()">
         ✂️ Prenota il Tuo Servizio
       </button>
     </div>

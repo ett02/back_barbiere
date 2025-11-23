@@ -1,409 +1,546 @@
-<div class="admin-dashboard">
-  <aside class="sidebar">
-    <div class="brand">
-      <h1>Dashboard</h1>
-      <p>Gestisci il tuo barber shop</p>
+<div class="min-h-screen bg-background lg:flex">
+  <!-- Mobile Header -->
+  <div class="lg:hidden flex items-center justify-between p-4 bg-white shadow-sm sticky top-0 z-20">
+    <div class="flex items-center gap-2">
+      <h1 class="text-xl font-bold text-primary font-heading">Dashboard</h1>
     </div>
-    <nav class="menu">
-      <button type="button" [class.active]="selectedSection === 'services'" (click)="setSection('services')">
-        <span class="icon">💈</span>
+    <button class="p-2 rounded-lg hover:bg-gray-100 text-text-primary" (click)="toggleSidebar()">
+      <span class="text-2xl">☰</span>
+    </button>
+  </div>
+
+  <!-- Sidebar Overlay -->
+  <div class="fixed inset-0 bg-black/50 z-30 lg:hidden transition-opacity" *ngIf="isSidebarOpen"
+    (click)="toggleSidebar()"></div>
+
+  <!-- Sidebar -->
+  <aside
+    class="fixed inset-y-0 left-0 z-40 w-64 bg-white shadow-xl transform transition-transform duration-300 lg:translate-x-0 lg:static lg:shadow-none flex flex-col"
+    [class.-translate-x-full]="!isSidebarOpen">
+    <div class="p-6 border-b border-gray-100">
+      <h1 class="text-2xl font-bold text-primary font-heading mb-1">Dashboard</h1>
+      <p class="text-sm text-text-secondary font-medium">Gestisci il tuo barber shop</p>
+    </div>
+    <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
+      <button type="button"
+        class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-text-secondary hover:bg-primary/10 hover:text-primary transition-all text-left"
+        [class.bg-primary-light]="selectedSection === 'services'" [class.text-primary]="selectedSection === 'services'"
+        (click)="setSection('services'); isSidebarOpen = false">
+        <span class="text-xl">💈</span>
         <span>Servizi</span>
       </button>
-      <button type="button" [class.active]="selectedSection === 'barbers'" (click)="setSection('barbers')">
-        <span class="icon">🧔</span>
+      <button type="button"
+        class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-text-secondary hover:bg-primary/10 hover:text-primary transition-all text-left"
+        [class.bg-primary-light]="selectedSection === 'barbers'" [class.text-primary]="selectedSection === 'barbers'"
+        (click)="setSection('barbers'); isSidebarOpen = false">
+        <span class="text-xl">🧔</span>
         <span>Barbieri</span>
       </button>
-      <button type="button" [class.active]="selectedSection === 'agenda'" (click)="setSection('agenda')">
-        <span class="icon">📅</span>
+      <button type="button"
+        class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-text-secondary hover:bg-primary/10 hover:text-primary transition-all text-left"
+        [class.bg-primary-light]="selectedSection === 'agenda'" [class.text-primary]="selectedSection === 'agenda'"
+        (click)="setSection('agenda'); isSidebarOpen = false">
+        <span class="text-xl">📅</span>
         <span>Agenda</span>
       </button>
-      <button type="button" [class.active]="selectedSection === 'settings'" (click)="setSection('settings')">
-        <span class="icon">⏰</span>
+      <button type="button"
+        class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-text-secondary hover:bg-primary/10 hover:text-primary transition-all text-left"
+        [class.bg-primary-light]="selectedSection === 'settings'" [class.text-primary]="selectedSection === 'settings'"
+        (click)="setSection('settings'); isSidebarOpen = false">
+        <span class="text-xl">⏰</span>
         <span>Orari</span>
       </button>
     </nav>
   </aside>
 
-  <main class="content">
+  <main class="flex-1 p-4 lg:p-8 overflow-y-auto h-[calc(100vh-64px)] lg:h-screen">
     <!-- Servizi -->
-    <section class="panel" *ngIf="selectedSection === 'services'">
-      <div class="section-header">
+    <section class="space-y-6 animate-[fadeIn_0.4s_ease-out]" *ngIf="selectedSection === 'services'">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2>Gestione Servizi</h2>
-          <p>Modifica o aggiungi i servizi offerti dal salone.</p>
+          <h2 class="text-2xl font-bold text-text-primary mb-1">Gestione Servizi</h2>
+          <p class="text-text-secondary">Modifica o aggiungi i servizi offerti dal salone.</p>
         </div>
       </div>
 
-      <div class="panel-body agenda-body">
-        <div class="table-card">
-          <h3>Servizi disponibili</h3>
-          <table class="data-table" *ngIf="(services$ | async) as services; else loadingServices">
-            <ng-container *ngIf="services.length > 0; else emptyServices">
-              <thead>
-                <tr>
-                  <th>Nome</th>
-                  <th>Durata</th>
-                  <th>Prezzo</th>
-                  <th>Descrizione</th>
-                  <th class="actions">Azioni</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let service of services">
-                  <td>
-                    <ng-container *ngIf="editingService?.id !== service.id; else editServiceName">
-                      {{ service.nome }}
-                    </ng-container>
-                    <ng-template #editServiceName>
-                      <input type="text" [(ngModel)]="editingService!.nome" [ngModelOptions]="{ standalone: true }" />
-                    </ng-template>
-                  </td>
-                  <td>
-                    <ng-container *ngIf="editingService?.id !== service.id; else editServiceDuration">
-                      {{ service.durata }} min
-                    </ng-container>
-                    <ng-template #editServiceDuration>
-                      <input type="number" min="0" [(ngModel)]="editingService!.durata"
-                        [ngModelOptions]="{ standalone: true }" />
-                    </ng-template>
-                  </td>
-                  <td>
-                    <ng-container *ngIf="editingService?.id !== service.id; else editServicePrice">
-                      €{{ service.prezzo | number: '1.2-2' }}
-                    </ng-container>
-                    <ng-template #editServicePrice>
-                      <input type="number" min="0" step="0.5" [(ngModel)]="editingService!.prezzo"
-                        [ngModelOptions]="{ standalone: true }" />
-                    </ng-template>
-                  </td>
-                  <td class="description-cell">
-                    <ng-container *ngIf="editingService?.id !== service.id; else editServiceDescription">
-                      {{ service.descrizione }}
-                    </ng-container>
-                    <ng-template #editServiceDescription>
-                      <textarea rows="2" [(ngModel)]="editingService!.descrizione"
-                        [ngModelOptions]="{ standalone: true }"></textarea>
-                    </ng-template>
-                  </td>
-                  <td class="actions">
-                    <ng-container *ngIf="editingService?.id === service.id; else viewServiceActions">
-                      <button type="button" class="btn primary" (click)="saveService()">Salva</button>
-                      <button type="button" class="btn ghost" (click)="cancelEditService()">Annulla</button>
-                    </ng-container>
-                    <ng-template #viewServiceActions>
-                      <button type="button" class="btn ghost" (click)="startEditService(service)">Modifica</button>
-                    </ng-template>
-                    <button type="button" class="btn danger" (click)="deleteService(service.id)">Elimina</button>
-                  </td>
-                </tr>
-              </tbody>
-            </ng-container>
-          </table>
-          <ng-template #loadingServices>
-            <p class="loading">Caricamento servizi...</p>
-          </ng-template>
-          <ng-template #emptyServices>
-            <p class="empty-state">Non ci sono servizi disponibili al momento.</p>
-          </ng-template>
+      <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <div class="xl:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <div class="p-6 border-b border-gray-100">
+            <h3 class="text-lg font-bold text-primary">Servizi disponibili</h3>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm" *ngIf="(services$ | async) as services; else loadingServices">
+              <ng-container *ngIf="services.length > 0; else emptyServices">
+                <thead class="bg-gray-50 text-text-primary font-bold">
+                  <tr>
+                    <th class="p-4">Nome</th>
+                    <th class="p-4">Durata</th>
+                    <th class="p-4">Prezzo</th>
+                    <th class="p-4 min-w-[200px]">Descrizione</th>
+                    <th class="p-4">Azioni</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                  <tr *ngFor="let service of services" class="hover:bg-gray-50 transition-colors">
+                    <td class="p-4 align-top">
+                      <ng-container *ngIf="editingService?.id !== service.id; else editServiceName">
+                        <span class="font-medium">{{ service.nome }}</span>
+                      </ng-container>
+                      <ng-template #editServiceName>
+                        <input type="text"
+                          class="w-full p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                          [(ngModel)]="editingService!.nome" [ngModelOptions]="{ standalone: true }" />
+                      </ng-template>
+                    </td>
+                    <td class="p-4 align-top">
+                      <ng-container *ngIf="editingService?.id !== service.id; else editServiceDuration">
+                        {{ service.durata }} min
+                      </ng-container>
+                      <ng-template #editServiceDuration>
+                        <input type="number" min="0"
+                          class="w-20 p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                          [(ngModel)]="editingService!.durata" [ngModelOptions]="{ standalone: true }" />
+                      </ng-template>
+                    </td>
+                    <td class="p-4 align-top">
+                      <ng-container *ngIf="editingService?.id !== service.id; else editServicePrice">
+                        <span class="font-bold text-primary">€{{ service.prezzo | number: '1.2-2' }}</span>
+                      </ng-container>
+                      <ng-template #editServicePrice>
+                        <input type="number" min="0" step="0.5"
+                          class="w-24 p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                          [(ngModel)]="editingService!.prezzo" [ngModelOptions]="{ standalone: true }" />
+                      </ng-template>
+                    </td>
+                    <td class="p-4 align-top text-text-secondary">
+                      <ng-container *ngIf="editingService?.id !== service.id; else editServiceDescription">
+                        {{ service.descrizione }}
+                      </ng-container>
+                      <ng-template #editServiceDescription>
+                        <textarea rows="2"
+                          class="w-full p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                          [(ngModel)]="editingService!.descrizione" [ngModelOptions]="{ standalone: true }"></textarea>
+                      </ng-template>
+                    </td>
+                    <td class="p-4 align-top">
+                      <div class="flex flex-wrap gap-2">
+                        <ng-container *ngIf="editingService?.id === service.id; else viewServiceActions">
+                          <button type="button"
+                            class="px-3 py-1 bg-primary text-white text-xs font-bold rounded-lg hover:bg-primary-hover transition-colors"
+                            (click)="saveService()">Salva</button>
+                          <button type="button"
+                            class="px-3 py-1 border border-gray-200 text-text-secondary text-xs font-bold rounded-lg hover:bg-gray-50 transition-colors"
+                            (click)="cancelEditService()">Annulla</button>
+                        </ng-container>
+                        <ng-template #viewServiceActions>
+                          <button type="button"
+                            class="px-3 py-1 border border-primary/30 text-primary text-xs font-bold rounded-lg hover:bg-primary/5 transition-colors"
+                            (click)="startEditService(service)">Modifica</button>
+                        </ng-template>
+                        <button type="button"
+                          class="px-3 py-1 bg-error/10 text-error text-xs font-bold rounded-lg hover:bg-error/20 transition-colors"
+                          (click)="deleteService(service.id)">Elimina</button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </ng-container>
+            </table>
+            <ng-template #loadingServices>
+              <p class="p-8 text-center text-text-secondary">Caricamento servizi...</p>
+            </ng-template>
+            <ng-template #emptyServices>
+              <p class="p-8 text-center text-text-secondary bg-gray-50 m-4 rounded-xl">Non ci sono servizi disponibili
+                al momento.</p>
+            </ng-template>
+          </div>
         </div>
 
-        <div class="form-card">
-          <h3>Aggiungi nuovo servizio</h3>
-          <form (ngSubmit)="createService()">
-            <label>
-              Nome
-              <input type="text" [(ngModel)]="newService.nome" name="service_nome" required />
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 h-fit sticky top-6">
+          <h3 class="text-lg font-bold text-primary mb-4">Aggiungi nuovo servizio</h3>
+          <form (ngSubmit)="createService()" class="space-y-4">
+            <label class="block">
+              <span class="text-sm font-semibold text-text-secondary mb-1 block">Nome</span>
+              <input type="text"
+                class="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                [(ngModel)]="newService.nome" name="service_nome" required />
             </label>
-            <label>
-              Prezzo (€)
-              <input type="number" [(ngModel)]="newService.prezzo" name="service_prezzo" min="0" step="0.5" required />
+            <div class="grid grid-cols-2 gap-4">
+              <label class="block">
+                <span class="text-sm font-semibold text-text-secondary mb-1 block">Prezzo (€)</span>
+                <input type="number"
+                  class="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                  [(ngModel)]="newService.prezzo" name="service_prezzo" min="0" step="0.5" required />
+              </label>
+              <label class="block">
+                <span class="text-sm font-semibold text-text-secondary mb-1 block">Durata (min)</span>
+                <input type="number"
+                  class="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                  [(ngModel)]="newService.durata" name="service_durata" min="0" required />
+              </label>
+            </div>
+            <label class="block">
+              <span class="text-sm font-semibold text-text-secondary mb-1 block">Descrizione</span>
+              <textarea
+                class="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                [(ngModel)]="newService.descrizione" name="service_descrizione" rows="3"></textarea>
             </label>
-            <label>
-              Durata (min)
-              <input type="number" [(ngModel)]="newService.durata" name="service_durata" min="0" required />
-            </label>
-            <label>
-              Descrizione
-              <textarea [(ngModel)]="newService.descrizione" name="service_descrizione" rows="3"></textarea>
-            </label>
-            <button type="submit" class="btn primary">Aggiungi Servizio</button>
+            <button type="submit"
+              class="w-full py-3 bg-primary text-white font-bold rounded-xl shadow-primary hover:bg-primary-hover active:scale-95 transition-all">Aggiungi
+              Servizio</button>
           </form>
         </div>
       </div>
     </section>
 
     <!-- Barbieri -->
-    <section class="panel" *ngIf="selectedSection === 'barbers'">
-      <div class="section-header">
+    <section class="space-y-6 animate-[fadeIn_0.4s_ease-out]" *ngIf="selectedSection === 'barbers'">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2>Team di barbieri</h2>
-          <p>Gestisci i professionisti disponibili in salone.</p>
+          <h2 class="text-2xl font-bold text-text-primary mb-1">Team di barbieri</h2>
+          <p class="text-text-secondary">Gestisci i professionisti disponibili in salone.</p>
         </div>
       </div>
 
-      <div class="panel-body barbers-body">
-        <div class="table-card">
-          <h3>Barbieri attivi</h3>
-          <table class="data-table" *ngIf="(barbers$ | async) as barbers; else loadingBarbers">
-            <ng-container *ngIf="barbers.length > 0; else emptyBarbers">
-              <thead>
-                <tr>
-                  <th>Nome</th>
-                  <th>Cognome</th>
-                  <th>Esperienza</th>
-                  <th>Specialità</th>
-                  <th class="actions">Azioni</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let barber of barbers">
-                  <td>
-                    <ng-container *ngIf="editingBarber?.id !== barber.id; else editBarberName">
-                      {{ barber.nome }}
-                    </ng-container>
-                    <ng-template #editBarberName>
-                      <input type="text" [(ngModel)]="editingBarber!.nome" [ngModelOptions]="{ standalone: true }" />
-                    </ng-template>
-                  </td>
-                  <td>
-                    <ng-container *ngIf="editingBarber?.id !== barber.id; else editBarberSurname">
-                      {{ barber.cognome }}
-                    </ng-container>
-                    <ng-template #editBarberSurname>
-                      <input type="text" [(ngModel)]="editingBarber!.cognome" [ngModelOptions]="{ standalone: true }" />
-                    </ng-template>
-                  </td>
-                  <td>
-                    <ng-container *ngIf="editingBarber?.id !== barber.id; else editBarberExperience">
-                      {{ barber.esperienza }}
-                    </ng-container>
-                    <ng-template #editBarberExperience>
-                      <input type="text" [(ngModel)]="editingBarber!.esperienza"
-                        [ngModelOptions]="{ standalone: true }" />
-                    </ng-template>
-                  </td>
-                  <td>
-                    <ng-container *ngIf="editingBarber?.id !== barber.id; else editBarberSpecialty">
-                      {{ barber.specialita }}
-                    </ng-container>
-                    <ng-template #editBarberSpecialty>
-                      <input type="text" [(ngModel)]="editingBarber!.specialita"
-                        [ngModelOptions]="{ standalone: true }" />
-                    </ng-template>
-                  </td>
-                  <td class="actions">
-                    <ng-container *ngIf="editingBarber?.id === barber.id; else viewBarberActions">
-                      <button type="button" class="btn primary" (click)="saveBarber()">Salva</button>
-                      <button type="button" class="btn ghost" (click)="cancelEditBarber()">Annulla</button>
-                    </ng-container>
-                    <ng-template #viewBarberActions>
-                      <button type="button" class="btn ghost" (click)="startEditBarber(barber)">Modifica</button>
-                    </ng-template>
-                    <button type="button" class="btn danger" (click)="deleteBarber(barber.id)">Elimina</button>
-                  </td>
-                </tr>
-              </tbody>
-            </ng-container>
-          </table>
-          <ng-template #loadingBarbers>
-            <p class="loading">Caricamento barbieri...</p>
-          </ng-template>
-          <ng-template #emptyBarbers>
-            <p class="empty-state">Non ci sono barbieri registrati.</p>
-          </ng-template>
-        </div>
-
-        <div class="services-editor" *ngIf="editingBarber">
-          <div class="services-editor-header">
-            <div>
-              <h4>Servizi erogati da {{ editingBarber.nome }} {{ editingBarber.cognome }}</h4>
-              <p class="hint">Seleziona quali servizi può offrire questo barbiere.</p>
+      <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <div class="xl:col-span-2 space-y-6">
+          <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="p-6 border-b border-gray-100">
+              <h3 class="text-lg font-bold text-primary">Barbieri attivi</h3>
             </div>
-            <button type="button" class="btn ghost" (click)="toggleServicesDropdown()">
-              {{ servicesDropdownOpen ? 'Chiudi elenco' : 'Seleziona servizi' }}
-            </button>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-sm" *ngIf="(barbers$ | async) as barbers; else loadingBarbers">
+                <ng-container *ngIf="barbers.length > 0; else emptyBarbers">
+                  <thead class="bg-gray-50 text-text-primary font-bold">
+                    <tr>
+                      <th class="p-4">Nome</th>
+                      <th class="p-4">Cognome</th>
+                      <th class="p-4">Esperienza</th>
+                      <th class="p-4">Specialità</th>
+                      <th class="p-4">Azioni</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-gray-100">
+                    <tr *ngFor="let barber of barbers" class="hover:bg-gray-50 transition-colors">
+                      <td class="p-4 align-top">
+                        <ng-container *ngIf="editingBarber?.id !== barber.id; else editBarberName">
+                          <span class="font-medium">{{ barber.nome }}</span>
+                        </ng-container>
+                        <ng-template #editBarberName>
+                          <input type="text"
+                            class="w-full p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                            [(ngModel)]="editingBarber!.nome" [ngModelOptions]="{ standalone: true }" />
+                        </ng-template>
+                      </td>
+                      <td class="p-4 align-top">
+                        <ng-container *ngIf="editingBarber?.id !== barber.id; else editBarberSurname">
+                          {{ barber.cognome }}
+                        </ng-container>
+                        <ng-template #editBarberSurname>
+                          <input type="text"
+                            class="w-full p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                            [(ngModel)]="editingBarber!.cognome" [ngModelOptions]="{ standalone: true }" />
+                        </ng-template>
+                      </td>
+                      <td class="p-4 align-top text-text-secondary">
+                        <ng-container *ngIf="editingBarber?.id !== barber.id; else editBarberExperience">
+                          {{ barber.esperienza }}
+                        </ng-container>
+                        <ng-template #editBarberExperience>
+                          <input type="text"
+                            class="w-full p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                            [(ngModel)]="editingBarber!.esperienza" [ngModelOptions]="{ standalone: true }" />
+                        </ng-template>
+                      </td>
+                      <td class="p-4 align-top text-text-secondary">
+                        <ng-container *ngIf="editingBarber?.id !== barber.id; else editBarberSpecialty">
+                          {{ barber.specialita }}
+                        </ng-container>
+                        <ng-template #editBarberSpecialty>
+                          <input type="text"
+                            class="w-full p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                            [(ngModel)]="editingBarber!.specialita" [ngModelOptions]="{ standalone: true }" />
+                        </ng-template>
+                      </td>
+                      <td class="p-4 align-top">
+                        <div class="flex flex-wrap gap-2">
+                          <ng-container *ngIf="editingBarber?.id === barber.id; else viewBarberActions">
+                            <button type="button"
+                              class="px-3 py-1 bg-primary text-white text-xs font-bold rounded-lg hover:bg-primary-hover transition-colors"
+                              (click)="saveBarber()">Salva</button>
+                            <button type="button"
+                              class="px-3 py-1 border border-gray-200 text-text-secondary text-xs font-bold rounded-lg hover:bg-gray-50 transition-colors"
+                              (click)="cancelEditBarber()">Annulla</button>
+                          </ng-container>
+                          <ng-template #viewBarberActions>
+                            <button type="button"
+                              class="px-3 py-1 border border-primary/30 text-primary text-xs font-bold rounded-lg hover:bg-primary/5 transition-colors"
+                              (click)="startEditBarber(barber)">Modifica</button>
+                          </ng-template>
+                          <button type="button"
+                            class="px-3 py-1 bg-error/10 text-error text-xs font-bold rounded-lg hover:bg-error/20 transition-colors"
+                            (click)="deleteBarber(barber.id)">Elimina</button>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </ng-container>
+              </table>
+              <ng-template #loadingBarbers>
+                <p class="p-8 text-center text-text-secondary">Caricamento barbieri...</p>
+              </ng-template>
+              <ng-template #emptyBarbers>
+                <p class="p-8 text-center text-text-secondary bg-gray-50 m-4 rounded-xl">Non ci sono barbieri
+                  registrati.</p>
+              </ng-template>
+            </div>
           </div>
 
-          <div class="services-dropdown" *ngIf="servicesDropdownOpen">
-            <div *ngIf="!editingBarberServiceIds" class="loading">Caricamento servizi...</div>
-            <div class="services-checkboxes" *ngIf="editingBarberServiceIds">
-              <label class="service-check" *ngFor="let service of services$ | async">
-                <input type="checkbox" [checked]="editingBarberServiceIds.has(service.id!)"
-                  (change)="toggleServiceForEditingBarber(service.id!, $event.target.checked)" />
-                <span class="service-name">
-                  {{ service.nome }} ({{ service.durata }} min • €{{ service.prezzo | number: '1.2-2' }})
-                </span>
+          <div class="bg-primary/5 border border-primary/20 rounded-2xl p-6 shadow-sm" *ngIf="editingBarber">
+            <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
+              <div>
+                <h4 class="text-lg font-bold text-primary">Servizi erogati da {{ editingBarber.nome }} {{
+                  editingBarber.cognome }}</h4>
+                <p class="text-sm text-text-secondary">Seleziona quali servizi può offrire questo barbiere.</p>
+              </div>
+              <button type="button"
+                class="px-4 py-2 bg-white border border-primary/30 text-primary font-semibold rounded-lg hover:bg-primary hover:text-white transition-colors text-sm"
+                (click)="toggleServicesDropdown()">
+                {{ servicesDropdownOpen ? 'Chiudi elenco' : 'Seleziona servizi' }}
+              </button>
+            </div>
+
+            <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm mb-4 animate-[fadeIn_0.2s_ease-out]"
+              *ngIf="servicesDropdownOpen">
+              <div *ngIf="!editingBarberServiceIds" class="text-center text-text-secondary py-4">Caricamento servizi...
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" *ngIf="editingBarberServiceIds">
+                <label class="flex items-start gap-3 p-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors"
+                  *ngFor="let service of services$ | async">
+                  <input type="checkbox" class="mt-1 w-4 h-4 text-primary rounded border-gray-300 focus:ring-primary"
+                    [checked]="editingBarberServiceIds.has(service.id!)"
+                    (change)="toggleServiceForEditingBarber(service.id!, $event.target.checked)" />
+                  <span class="text-sm text-text-secondary">
+                    <strong class="text-text-primary block">{{ service.nome }}</strong>
+                    {{ service.durata }} min • €{{ service.prezzo | number: '1.2-2' }}
+                  </span>
+                </label>
+              </div>
+            </div>
+
+            <div class="flex flex-wrap gap-2" *ngIf="editingBarberServiceIds">
+              <span class="px-3 py-1 bg-primary/10 text-primary text-xs font-bold rounded-full"
+                *ngFor="let service of services$ | async" [hidden]="!editingBarberServiceIds.has(service.id!)">
+                {{ service.nome }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 h-fit sticky top-6">
+          <h3 class="text-lg font-bold text-primary mb-4">Aggiungi nuovo barbiere</h3>
+          <form (ngSubmit)="createBarber()" class="space-y-4">
+            <div class="grid grid-cols-2 gap-4">
+              <label class="block">
+                <span class="text-sm font-semibold text-text-secondary mb-1 block">Nome</span>
+                <input type="text"
+                  class="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                  [(ngModel)]="newBarber.nome" name="barber_nome" required />
+              </label>
+              <label class="block">
+                <span class="text-sm font-semibold text-text-secondary mb-1 block">Cognome</span>
+                <input type="text"
+                  class="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                  [(ngModel)]="newBarber.cognome" name="barber_cognome" required />
               </label>
             </div>
-          </div>
-
-          <div class="services-selected" *ngIf="editingBarberServiceIds">
-            <span class="pill" *ngFor="let service of services$ | async"
-              [hidden]="!editingBarberServiceIds.has(service.id!)">
-              {{ service.nome }}
-            </span>
-          </div>
-        </div>
-
-        <div class="form-card">
-          <h3>Aggiungi nuovo barbiere</h3>
-          <form (ngSubmit)="createBarber()">
-            <label>
-              Nome
-              <input type="text" [(ngModel)]="newBarber.nome" name="barber_nome" required />
+            <label class="block">
+              <span class="text-sm font-semibold text-text-secondary mb-1 block">Esperienza</span>
+              <input type="text"
+                class="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                [(ngModel)]="newBarber.esperienza" name="barber_esperienza" />
             </label>
-            <label>
-              Cognome
-              <input type="text" [(ngModel)]="newBarber.cognome" name="barber_cognome" required />
+            <label class="block">
+              <span class="text-sm font-semibold text-text-secondary mb-1 block">Specialità</span>
+              <input type="text"
+                class="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                [(ngModel)]="newBarber.specialita" name="barber_specialita" />
             </label>
-            <label>
-              Esperienza
-              <input type="text" [(ngModel)]="newBarber.esperienza" name="barber_esperienza" />
-            </label>
-            <label>
-              Specialità
-              <input type="text" [(ngModel)]="newBarber.specialita" name="barber_specialita" />
-            </label>
-            <button type="submit" class="btn primary">Aggiungi Barbiere</button>
+            <button type="submit"
+              class="w-full py-3 bg-primary text-white font-bold rounded-xl shadow-primary hover:bg-primary-hover active:scale-95 transition-all">Aggiungi
+              Barbiere</button>
           </form>
         </div>
       </div>
     </section>
 
     <!-- Agenda -->
-    <section class="panel" *ngIf="selectedSection === 'agenda'">
-      <div class="section-header">
+    <section class="space-y-6 animate-[fadeIn_0.4s_ease-out]" *ngIf="selectedSection === 'agenda'">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2>Agenda appuntamenti</h2>
-          <p>Consulta gli appuntamenti confermati per ogni giornata.</p>
+          <h2 class="text-2xl font-bold text-text-primary mb-1">Agenda appuntamenti</h2>
+          <p class="text-text-secondary">Consulta gli appuntamenti confermati per ogni giornata.</p>
         </div>
       </div>
-      <div class="panel-body">
-        <div class="agenda-controls">
-          <label for="agenda-date">Seleziona una data</label>
-          <div class="date-picker">
-            <input id="agenda-date" type="date" [(ngModel)]="selectedDate" name="agenda_date"
-              (change)="onAgendaDateChange()" />
-            <button type="button" class="btn ghost today-btn" (click)="setToday()">Oggi</button>
-          </div>
-          <p class="date-hint">Scegli un giorno per vedere gli appuntamenti confermati in agenda.</p>
 
-          <div class="mini-calendar" aria-label="Calendario appuntamenti">
-            <div class="calendar-header">
-              <button type="button" class="nav" (click)="goToPrevMonth()" aria-label="Mese precedente">◀</button>
-              <div class="month-label">{{ calendarMonthLabel }}</div>
-              <button type="button" class="nav" (click)="goToNextMonth()" aria-label="Mese successivo">▶</button>
-            </div>
-            <div class="calendar-weekdays">
-              <span class="weekday" *ngFor="let day of calendarWeekdays">{{ day }}</span>
-            </div>
-            <div class="calendar-grid">
-              <button type="button" class="day" *ngFor="let day of calendarDays" [class.outside]="!day.inMonth"
-                [class.today]="day.isToday" [class.selected]="day.isSelected" (click)="selectCalendarDay(day)">
-                {{ day.date.getDate() }}
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div *ngIf="(appointments$ | async) as appointments; else loadingAppointments">
-          <div *ngIf="appointments.length > 0; else emptyAppointments" class="appointments-grid">
-            <article class="appointment-card" *ngFor="let appointment of appointments">
-              <header class="appointment-header">
-                <div class="appointment-time-wrapper">
-                  <span class="appointment-time">{{ formatTime(appointment.orarioInizio) }}</span>
-                  <span class="appointment-duration" *ngIf="appointment.service?.durata">
-                    ⏱️ {{ appointment.service?.durata }} min
-                  </span>
-                </div>
-                <span class="appointment-status" [ngClass]="getAppointmentStatusClass(appointment.stato)">
-                  {{ appointment.stato }}
-                </span>
-              </header>
-
-              <div class="appointment-body">
-                <h4 class="appointment-service">{{ appointment.service?.nome }}</h4>
-                <ul class="appointment-meta">
-                  <li class="meta-item">
-                    <span class="meta-icon">🙍</span>
-                    <span>{{ appointment.customer?.nome }} {{ appointment.customer?.cognome }}</span>
-                  </li>
-                  <li class="meta-item">
-                    <span class="meta-icon">💈</span>
-                    <span>{{ appointment.barber?.nome }} {{ appointment.barber?.cognome }}</span>
-                  </li>
-                </ul>
+      <div class="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div class="lg:col-span-1 space-y-6">
+          <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <label for="agenda-date" class="block text-sm font-bold text-text-primary mb-2">Seleziona una data</label>
+            <div class="flex items-center gap-2 mb-4">
+              <div class="flex-1 flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2">
+                <input id="agenda-date" type="date"
+                  class="bg-transparent border-none outline-none w-full text-sm font-semibold text-text-primary"
+                  [(ngModel)]="selectedDate" name="agenda_date" (change)="onAgendaDateChange()" />
               </div>
-            </article>
+              <button type="button"
+                class="px-3 py-2 bg-primary/10 text-primary text-sm font-bold rounded-xl hover:bg-primary hover:text-white transition-all"
+                (click)="setToday()">Oggi</button>
+            </div>
+
+            <div class="bg-white border border-gray-100 rounded-xl shadow-sm p-4">
+              <div class="flex justify-between items-center mb-4">
+                <button type="button" class="p-1 hover:bg-gray-100 rounded-lg transition-colors"
+                  (click)="goToPrevMonth()">◀</button>
+                <div class="font-bold text-text-primary capitalize">{{ calendarMonthLabel }}</div>
+                <button type="button" class="p-1 hover:bg-gray-100 rounded-lg transition-colors"
+                  (click)="goToNextMonth()">▶</button>
+              </div>
+              <div class="grid grid-cols-7 gap-1 text-center mb-2">
+                <span class="text-xs font-bold text-text-secondary" *ngFor="let day of calendarWeekdays">{{ day
+                  }}</span>
+              </div>
+              <div class="grid grid-cols-7 gap-1">
+                <button type="button"
+                  class="h-8 w-8 mx-auto flex items-center justify-center rounded-lg text-sm font-semibold transition-all"
+                  *ngFor="let day of calendarDays" [class.text-gray-300]="!day.inMonth"
+                  [class.text-text-primary]="day.inMonth && !day.isSelected && !day.isToday"
+                  [class.bg-primary]="day.isSelected" [class.text-white]="day.isSelected"
+                  [class.ring-2]="day.isToday && !day.isSelected" [class.ring-primary]="day.isToday && !day.isSelected"
+                  [class.hover:bg-primary/10]="!day.isSelected && day.inMonth" (click)="selectCalendarDay(day)">
+                  {{ day.date.getDate() }}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
-        <ng-template #emptyAppointments>
-          <p class="empty-state">Non sono presenti appuntamenti per la data selezionata.</p>
+
+        <div class="lg:col-span-2 xl:col-span-3">
+          <div *ngIf="(appointments$ | async) as appointments; else loadingAppointments">
+            <div *ngIf="appointments.length > 0; else emptyAppointments"
+              class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+              <article
+                class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 flex flex-col gap-4 hover:shadow-md transition-shadow"
+                *ngFor="let appointment of appointments">
+                <header class="flex justify-between items-start gap-2">
+                  <div class="flex flex-col">
+                    <span class="text-2xl font-bold text-primary leading-none">{{ formatTime(appointment.orarioInizio)
+                      }}</span>
+                    <span class="text-xs font-semibold text-text-secondary mt-1" *ngIf="appointment.service?.durata">
+                      ⏱️ {{ appointment.service?.durata }} min
+                    </span>
+                  </div>
+                  <span class="px-2 py-1 rounded-full text-[0.65rem] font-bold uppercase tracking-wider"
+                    [ngClass]="getAppointmentStatusClass(appointment.stato)">
+                    {{ appointment.stato }}
+                  </span>
+                </header>
+
+                <div>
+                  <h4 class="text-lg font-bold text-text-primary mb-2">{{ appointment.service?.nome }}</h4>
+                  <ul class="space-y-2">
+                    <li class="flex items-center gap-2 text-sm text-text-secondary font-medium">
+                      <span class="text-lg">🙍</span>
+                      <span>{{ appointment.customer?.nome }} {{ appointment.customer?.cognome }}</span>
+                    </li>
+                    <li class="flex items-center gap-2 text-sm text-text-secondary font-medium">
+                      <span class="text-lg">💈</span>
+                      <span>{{ appointment.barber?.nome }} {{ appointment.barber?.cognome }}</span>
+                    </li>
+                  </ul>
+                </div>
+              </article>
+            </div>
+          </div>
+          <ng-template #emptyAppointments>
+            <div
+              class="flex flex-col items-center justify-center py-12 bg-white rounded-2xl border border-gray-100 shadow-sm text-center">
+              <div class="text-4xl mb-4 opacity-50">📅</div>
+              <p class="text-text-secondary font-medium">Non sono presenti appuntamenti per la data selezionata.</p>
+            </div>
+          </ng-template>
+        </div>
+        <ng-template #loadingAppointments>
+          <p class="col-span-full text-center py-12 text-text-secondary">Caricamento appuntamenti...</p>
         </ng-template>
       </div>
-      <ng-template #loadingAppointments>
-        <p class="loading">Caricamento appuntamenti...</p>
-      </ng-template>
     </section>
 
     <!-- Orari di apertura -->
-    <section class="panel" *ngIf="selectedSection === 'settings'">
+    <section class="space-y-6 animate-[fadeIn_0.4s_ease-out]" *ngIf="selectedSection === 'settings'">
       <ng-container *ngIf="(businessHours$ | async) as businessHours; else loadingHours">
-        <div class="section-header">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h2>Orari di apertura</h2>
-            <p>Definisci giorni di chiusura e fasce orarie di lavoro.</p>
+            <h2 class="text-2xl font-bold text-text-primary mb-1">Orari di apertura</h2>
+            <p class="text-text-secondary">Definisci giorni di chiusura e fasce orarie di lavoro.</p>
           </div>
           <div>
-            <button type="button" class="btn primary" (click)="saveBusinessHours(businessHours)"
-              [disabled]="isSavingBusinessHours">
+            <button type="button"
+              class="px-6 py-3 bg-primary text-white font-bold rounded-xl shadow-primary hover:bg-primary-hover active:scale-95 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+              (click)="saveBusinessHours(businessHours)" [disabled]="isSavingBusinessHours">
               {{ isSavingBusinessHours ? 'Salvataggio...' : 'Salva impostazioni' }}
             </button>
           </div>
         </div>
 
-        <div class="panel-body hours-body">
-          <div class="business-hours-grid">
-            <div class="business-day-card" *ngFor="let hours of businessHours" [class.closed]="!hours.aperto">
-              <div class="day-card-header">
-                <div>
-                  <h3>{{ getDayName(hours.giorno) }}</h3>
-                  <span class="status-pill" [class.open]="hours.aperto" [class.closed]="!hours.aperto">
-                    {{ hours.aperto ? 'Aperto' : 'Chiuso' }}
-                  </span>
-                </div>
-                <button type="button" class="btn toggle" (click)="toggleDayOpen(hours)">
-                  {{ hours.aperto ? 'Imposta come chiuso' : 'Imposta come aperto' }}
-                </button>
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          <div
+            class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col gap-4 transition-all hover:shadow-md"
+            *ngFor="let hours of businessHours" [class.bg-gray-50]="!hours.aperto" [class.opacity-80]="!hours.aperto">
+            <div class="flex items-center justify-between">
+              <div>
+                <h3 class="text-lg font-bold text-text-primary">{{ getDayName(hours.giorno) }}</h3>
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold uppercase mt-1"
+                  [class.bg-green-100]="hours.aperto" [class.text-green-700]="hours.aperto"
+                  [class.bg-red-100]="!hours.aperto" [class.text-red-700]="!hours.aperto">
+                  {{ hours.aperto ? 'Aperto' : 'Chiuso' }}
+                </span>
               </div>
+              <button type="button" class="text-sm font-semibold text-primary hover:underline"
+                (click)="toggleDayOpen(hours)">
+                {{ hours.aperto ? 'Chiudi' : 'Apri' }}
+              </button>
+            </div>
 
-              <div class="day-card-body">
-                <label>
-                  Orario di apertura
-                  <input type="time" [value]="hours.apertura || ''" (change)="hours.apertura = $event.target.value"
-                    [disabled]="!hours.aperto" />
-                </label>
-                <label>
-                  Orario di chiusura
-                  <input type="time" [value]="hours.chiusura || ''" (change)="hours.chiusura = $event.target.value"
-                    [disabled]="!hours.aperto" />
-                </label>
-              </div>
+            <div class="grid grid-cols-2 gap-4">
+              <label class="flex flex-col gap-1">
+                <span class="text-xs font-bold text-text-secondary uppercase">Apertura</span>
+                <input type="time"
+                  class="p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none bg-white disabled:bg-gray-100 disabled:text-gray-400"
+                  [value]="hours.apertura || ''" (change)="hours.apertura = $event.target.value"
+                  [disabled]="!hours.aperto" />
+              </label>
+              <label class="flex flex-col gap-1">
+                <span class="text-xs font-bold text-text-secondary uppercase">Chiusura</span>
+                <input type="time"
+                  class="p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none bg-white disabled:bg-gray-100 disabled:text-gray-400"
+                  [value]="hours.chiusura || ''" (change)="hours.chiusura = $event.target.value"
+                  [disabled]="!hours.aperto" />
+              </label>
             </div>
           </div>
-          <p class="update-message" *ngIf="businessHoursMessage">{{ businessHoursMessage }}</p>
         </div>
+        <p class="text-center font-semibold text-text-secondary mt-4" *ngIf="businessHoursMessage">{{
+          businessHoursMessage }}</p>
       </ng-container>
       <ng-template #loadingHours>
-        <div class="section-header">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h2>Orari di apertura</h2>
-            <p>Definisci giorni di chiusura e fasce orarie di lavoro.</p>
+            <h2 class="text-2xl font-bold text-text-primary mb-1">Orari di apertura</h2>
+            <p class="text-text-secondary">Definisci giorni di chiusura e fasce orarie di lavoro.</p>
           </div>
         </div>
-        <div class="panel-body">
-          <p class="loading">Caricamento orari...</p>
-        </div>
+        <p class="p-12 text-center text-text-secondary">Caricamento orari...</p>
       </ng-template>
     </section>
   </main>

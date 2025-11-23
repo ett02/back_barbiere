@@ -117,6 +117,12 @@ export class AdminDashboardComponent implements OnInit {
 
   readonly dayNames = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
 
+  isSidebarOpen = false;
+
+  toggleSidebar(): void {
+    this.isSidebarOpen = !this.isSidebarOpen;
+  }
+
   ngOnInit(): void {
     if (!this.authService.isAdminAuthenticated()) {
       this.router.navigate(['/login']);

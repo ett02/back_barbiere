@@ -1,18 +1,74 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply font-body text-text-primary bg-background min-h-screen antialiased;
+    background: linear-gradient(135deg, #f5f5dc 0%, #ececce 100%);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-heading font-bold text-text-primary mb-4;
+  }
+
+  h1 {
+    @apply text-3xl;
+  }
+
+  h2 {
+    @apply text-2xl;
+  }
+
+  h3 {
+    @apply text-xl;
+  }
+
+  h4 {
+    @apply text-lg;
+  }
+}
+
+/* Custom Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
 /* ===========================
    CSS VARIABLES - DESIGN SYSTEM
    =========================== */
 :root {
   /* Palette Colori (Beige & Orange - Refined) */
-  --color-background: #f5f5dc; /* Beige classico */
+  --color-background: #f5f5dc;
+  /* Beige classico */
   --color-background-gradient: linear-gradient(135deg, #f5f5dc 0%, #ececce 100%);
-  
-  --color-primary: #ff8c00; /* Arancio vibrante */
+
+  --color-primary: #ff8c00;
+  /* Arancio vibrante */
   --color-primary-hover: #ffa500;
   --color-primary-active: #e67e00;
   --color-primary-light: rgba(255, 140, 0, 0.15);
 
   /* Surface & Glassmorphism */
-  --color-surface: rgba(255, 255, 255, 0.7); /* Warm Glass */
+  --color-surface: rgba(255, 255, 255, 0.7);
+  /* Warm Glass */
   --color-surface-border: rgba(255, 255, 255, 0.5);
   --glass-blur: 12px;
   --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
@@ -21,7 +77,8 @@
   --font-heading: 'Montserrat', sans-serif;
   --font-body: 'Poppins', sans-serif;
 
-  --color-text-primary: #2c2c2c; /* Grigio scuro per contrasto su beige */
+  --color-text-primary: #2c2c2c;
+  /* Grigio scuro per contrasto su beige */
   --color-text-secondary: #5a5a5a;
   --color-white: #ffffff;
   --color-error: #d32f2f;
@@ -33,9 +90,10 @@
   --spacing-md: 1.5rem;
   --spacing-lg: 2rem;
   --spacing-xl: 3rem;
-  
+
   --header-height: 60px;
-  --bottom-nav-height: 70px; /* Altezza barra navigazione mobile */
+  --bottom-nav-height: 70px;
+  /* Altezza barra navigazione mobile */
 
   /* Border Radius */
   --radius-sm: 8px;
@@ -62,32 +120,27 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  -webkit-tap-highlight-color: transparent; /* Rimuove highlight al tocco su mobile */
+  -webkit-tap-highlight-color: transparent;
+  /* Rimuove highlight al tocco su mobile */
 }
 
 body {
-  font-family: var(--font-body);
-  font-size: 16px; /* Base size leggibile su mobile */
-  color: var(--color-text-primary);
-  background: var(--color-background-gradient);
-  min-height: 100vh;
+  font-size: 16px;
+  /* Base size leggibile su mobile */
   line-height: 1.5;
-  -webkit-font-smoothing: antialiased;
-  padding-bottom: calc(var(--bottom-nav-height) + var(--spacing-md)); /* Spazio per bottom nav */
+  padding-bottom: calc(var(--bottom-nav-height) + var(--spacing-md));
+  /* Spazio per bottom nav */
 }
 
-h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-heading);
-  font-weight: 700;
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   line-height: 1.2;
-  margin-bottom: var(--spacing-sm);
   color: var(--color-text-primary);
 }
-
-h1 { font-size: 2rem; }
-h2 { font-size: 1.75rem; }
-h3 { font-size: 1.5rem; }
-h4 { font-size: 1.25rem; }
 
 a {
   text-decoration: none;
@@ -114,7 +167,8 @@ a {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.875rem 1.5rem; /* Touch target > 44px */
+  padding: 0.875rem 1.5rem;
+  /* Touch target > 44px */
   font-family: var(--font-heading);
   font-weight: 600;
   font-size: 1rem;
@@ -123,7 +177,8 @@ a {
   cursor: pointer;
   transition: all var(--transition-fast);
   gap: 0.5rem;
-  min-height: 48px; /* Minimo per accessibilità mobile */
+  min-height: 48px;
+  /* Minimo per accessibilità mobile */
 }
 
 .btn-primary {
@@ -168,10 +223,11 @@ a {
 
 .form-control {
   width: 100%;
-  padding: 1rem; /* Padding generoso per input touch */
+  padding: 1rem;
+  /* Padding generoso per input touch */
   font-size: 1rem;
   font-family: var(--font-body);
-  border: 1px solid rgba(0,0,0,0.1);
+  border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: var(--radius-md);
   background: rgba(255, 255, 255, 0.9);
   transition: all var(--transition-fast);
@@ -194,18 +250,34 @@ a {
   padding: 0 var(--spacing-md);
 }
 
-.text-center { text-align: center; }
-.text-primary { color: var(--color-primary); }
+.text-center {
+  text-align: center;
+}
+
+.text-primary {
+  color: var(--color-primary);
+}
 
 /* Nascondi su desktop se necessario */
-.mobile-only { display: block; }
-.desktop-only { display: none; }
+.mobile-only {
+  display: block;
+}
+
+.desktop-only {
+  display: none;
+}
 
 @media (min-width: 769px) {
-  .mobile-only { display: none; }
-  .desktop-only { display: block; }
-  
+  .mobile-only {
+    display: none;
+  }
+
+  .desktop-only {
+    display: block;
+  }
+
   body {
-    padding-bottom: 0; /* Reset padding bottom nav su desktop */
+    padding-bottom: 0;
+    /* Reset padding bottom nav su desktop */
   }
 }
