@@ -1,5 +1,6 @@
 import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { ApiService } from '../../services/api.service';
+import { WaitingListService } from '../../services/waiting-list.service';
 import { AuthService } from '../../services/auth.service';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -19,22 +20,33 @@ import { catchError, switchMap } from 'rxjs/operators';
 })
 export class CustomerDashboardComponent implements OnInit {
   private apiService = inject(ApiService);
+  private waitingListService = inject(WaitingListService);
   private authService = inject(AuthService);
   private router = inject(Router);
 
   customerName = 'Cliente';
+  showAllEntries = false;
 
   private refreshWaitingList$ = new BehaviorSubject<void>(undefined);
 
-  waitingList$: Observable<WaitingList[]> = this.refreshWaitingList$.pipe(
+  private allWaitingList$ = this.refreshWaitingList$.pipe(
     switchMap(() => {
       const decodedToken = this.authService.getDecodedToken();
       if (!decodedToken || typeof decodedToken.id !== 'number') return of([]);
-      return this.apiService.getWaitingListByCustomerId(decodedToken.id);
+      return this.waitingListService.getWaitingListByCustomer(decodedToken.id);
     }),
     catchError((error) => {
       console.error('Error fetching waiting list:', error);
       return of([]);
+    })
+  );
+
+  public waitingList$: Observable<WaitingList[]> = this.allWaitingList$.pipe(
+    switchMap(list => {
+      if (this.showAllEntries) {
+        return of(list);
+      }
+      return of(list.filter(entry => entry.stato === 'IN_ATTESA'));
     })
   );
 
@@ -53,7 +65,7 @@ export class CustomerDashboardComponent implements OnInit {
 
   removeFromWaitingList(waitingId: number): void {
     if (confirm("Vuoi rimuoverti dalla lista d'attesa?")) {
-      this.apiService.removeFromWaitingList(waitingId).subscribe(
+      this.waitingListService.cancelWaitingListEntry(waitingId).subscribe(
         () => {
           this.refreshWaitingList$.next();
         },
@@ -62,6 +74,11 @@ export class CustomerDashboardComponent implements OnInit {
         }
       );
     }
+  }
+
+  toggleShowAllEntries(): void {
+    this.showAllEntries = !this.showAllEntries;
+    this.refreshWaitingList$.next();
   }
 
   getServiceName(service?: Service | null): string {

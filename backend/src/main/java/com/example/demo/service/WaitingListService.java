@@ -47,6 +47,13 @@ public class WaitingListService {
         Services service = servicesRepository.findById(request.getServiceId())
                 .orElseThrow(() -> new RuntimeException("Servizio non trovato"));
 
+        // Check if customer is already in the waiting list for this service and date
+        if (waitingListRepository.existsByCustomerIdAndBarberIdAndServiceIdAndDataRichiestaAndStato(
+                customer.getId(), barber.getId(), service.getId(), request.getDataRichiesta(),
+                WaitingList.StatoListaAttesa.IN_ATTESA)) {
+            throw new RuntimeException("Sei già in lista d'attesa per questo servizio in questa data.");
+        }
+
         WaitingList waitingList = new WaitingList();
         waitingList.setCustomer(customer);
         waitingList.setBarber(barber);
@@ -85,37 +92,36 @@ public class WaitingListService {
         // Trova il primo in coda per questo barbiere/servizio/data
         Optional<WaitingList> firstInQueue = waitingListRepository
                 .findFirstByBarberIdAndServiceIdAndDataRichiestaAndStatoOrderByDataIscrizioneAsc(
-                        barberId, serviceId, date, WaitingList.StatoListaAttesa.IN_ATTESA
-                );
+                        barberId, serviceId, date, WaitingList.StatoListaAttesa.IN_ATTESA);
 
         if (firstInQueue.isPresent()) {
             WaitingList waiting = firstInQueue.get();
-            
+
             // Crea appuntamento automatico per il primo in coda
             Appointments newAppointment = new Appointments();
-            
+
             com.example.demo.model.Users customer = new com.example.demo.model.Users();
             customer.setId(waiting.getCustomer().getId());
             newAppointment.setCustomer(customer);
-            
+
             com.example.demo.model.Barbers barber = new com.example.demo.model.Barbers();
             barber.setId(barberId);
             newAppointment.setBarber(barber);
-            
+
             Services service = new Services();
             service.setId(serviceId);
             newAppointment.setService(service);
-            
+
             newAppointment.setData(date);
             newAppointment.setOrarioInizio(LocalTime.of(9, 0));
             newAppointment.setStato(Appointments.StatoAppuntamento.CONFERMATO);
-            
+
             appointmentsRepository.save(newAppointment);
-            
+
             // Aggiorna stato lista d'attesa
             waiting.setStato(WaitingList.StatoListaAttesa.CONFERMATO);
             waitingListRepository.save(waiting);
-            
+
             System.out.println("✅ Slot assegnato automaticamente a: " + waiting.getCustomer().getEmail());
         } else {
             System.out.println("ℹ️ Nessuno in lista d'attesa per questo slot");
@@ -144,8 +150,7 @@ public class WaitingListService {
                 .findByBarberIdAndDataRichiestaAndStatoOrderByDataIscrizioneAsc(
                         entry.getBarber().getId(),
                         entry.getDataRichiesta(),
-                        WaitingList.StatoListaAttesa.IN_ATTESA
-                );
+                        WaitingList.StatoListaAttesa.IN_ATTESA);
 
         for (int i = 0; i < queue.size(); i++) {
             if (queue.get(i).getId().equals(waitingListId)) {

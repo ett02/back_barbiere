@@ -10,13 +10,17 @@ import java.util.Optional;
 
 @Repository
 public interface WaitingListRepository extends JpaRepository<WaitingList, Long> {
-    List<WaitingList> findByBarberIdAndDataRichiestaAndStatoOrderByDataIscrizioneAsc(
-            Long barberId, LocalDate dataRichiesta, WaitingList.StatoListaAttesa stato);
-    
-    List<WaitingList> findByCustomerIdAndStato(Long customerId, WaitingList.StatoListaAttesa stato);
-    
-    Optional<WaitingList> findFirstByBarberIdAndServiceIdAndDataRichiestaAndStatoOrderByDataIscrizioneAsc(
-            Long barberId, Long serviceId, LocalDate dataRichiesta, WaitingList.StatoListaAttesa stato);
-    
-    List<WaitingList> findByCustomerId(Long customerId);
+        List<WaitingList> findByBarberIdAndDataRichiestaAndStatoOrderByDataIscrizioneAsc(
+                        Long barberId, LocalDate dataRichiesta, WaitingList.StatoListaAttesa stato);
+
+        List<WaitingList> findByCustomerIdAndStato(Long customerId, WaitingList.StatoListaAttesa stato);
+
+        Optional<WaitingList> findFirstByBarberIdAndServiceIdAndDataRichiestaAndStatoOrderByDataIscrizioneAsc(
+                        Long barberId, Long serviceId, LocalDate dataRichiesta, WaitingList.StatoListaAttesa stato);
+
+        List<WaitingList> findByCustomerId(Long customerId);
+
+        boolean existsByCustomerIdAndBarberIdAndServiceIdAndDataRichiestaAndStato(
+                        Long customerId, Long barberId, Long serviceId, LocalDate dataRichiesta,
+                        WaitingList.StatoListaAttesa stato);
 }

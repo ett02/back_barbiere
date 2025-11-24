@@ -1,5 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { ApiService } from '../../services/api.service';
+import { WaitingListService } from '../../services/waiting-list.service';
 import { AuthService } from '../../services/auth.service';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -35,6 +36,7 @@ interface CalendarMonth {
 })
 export class ServiceBookingComponent implements OnInit {
   private apiService = inject(ApiService);
+  private waitingListService = inject(WaitingListService);
   private authService = inject(AuthService);
   private router = inject(Router);
 
@@ -259,6 +261,40 @@ export class ServiceBookingComponent implements OnInit {
         },
       });
     }
+  }
+
+  joinWaitingList(): void {
+    const decodedToken = this.authService.getDecodedToken();
+    if (decodedToken && typeof decodedToken.id === 'number' && this.selectedBarber && this.selectedService && this.selectedDate) {
+      const waitingListRequest = {
+        customerId: decodedToken.id,
+        barberId: this.selectedBarber.id!,
+        serviceId: this.selectedService.id!,
+        dataRichiesta: this.selectedDate,
+      };
+
+      this.bookingError = '';
+
+      this.waitingListService.joinWaitingList(waitingListRequest).subscribe({
+        next: () => {
+          alert('Ti sei unito alla lista d\'attesa! Ti avviseremo quando ci sarà un posto disponibile.');
+          this.router.navigate(['/customer-dashboard']);
+        },
+        error: (error) => {
+          console.error('Errore durante l\'iscrizione alla lista d\'attesa:', error);
+          this.bookingError =
+            error?.error?.message || error?.message || 'Si è verificato un errore. Potresti essere già in lista d\'attesa per questo servizio.';
+        },
+      });
+    }
+  }
+
+  get hasAnyAvailableSlot(): boolean {
+    return this.availableSlots.some(slot => slot.available);
+  }
+
+  get shouldShowWaitingListButton(): boolean {
+    return this.availableSlots.length > 0 && !this.hasAnyAvailableSlot;
   }
 
   formatTime(time: string): string {
