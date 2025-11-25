@@ -1,6 +1,7 @@
 package com.example.demo.service;
 
 import com.example.demo.dto.WaitingListRequest;
+import com.example.demo.exception.DuplicateWaitingListException;
 import com.example.demo.model.*;
 import com.example.demo.repository.*;
 
@@ -51,7 +52,7 @@ public class WaitingListService {
         if (waitingListRepository.existsByCustomerIdAndBarberIdAndServiceIdAndDataRichiestaAndStato(
                 customer.getId(), barber.getId(), service.getId(), request.getDataRichiesta(),
                 WaitingList.StatoListaAttesa.IN_ATTESA)) {
-            throw new RuntimeException("Sei già in lista d'attesa per questo servizio in questa data.");
+            throw new DuplicateWaitingListException("Sei già in lista d'attesa per questo servizio in questa data.");
         }
 
         WaitingList waitingList = new WaitingList();

@@ -223,6 +223,9 @@
         (click)="joinWaitingList()">
         📋 Unisciti alla Lista d'Attesa
       </button>
+      <p class="text-center text-error font-semibold mt-4 animate-[fadeIn_0.3s_ease-out]" *ngIf="bookingError">
+        {{ bookingError }}
+      </p>
     </div>
 
     <!-- Riepilogo e Conferma -->

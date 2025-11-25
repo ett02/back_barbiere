@@ -23,6 +23,7 @@ F:\back_barbiere\backend\src\main\java\com\example\demo\dto\UserProfileDTO.java
 F:\back_barbiere\backend\src\main\java\com\example\demo\dto\UserResponseDTO.java
 F:\back_barbiere\backend\src\main\java\com\example\demo\dto\ValidationErrorResponse.java
 F:\back_barbiere\backend\src\main\java\com\example\demo\dto\WaitingListRequest.java
+F:\back_barbiere\backend\src\main\java\com\example\demo\exception\DuplicateWaitingListException.java
 F:\back_barbiere\backend\src\main\java\com\example\demo\exception\GlobalExceptionHandler.java
 F:\back_barbiere\backend\src\main\java\com\example\demo\exception\ResourceNotFoundException.java
 F:\back_barbiere\backend\src\main\java\com\example\demo\exception\SlotNotAvailableException.java

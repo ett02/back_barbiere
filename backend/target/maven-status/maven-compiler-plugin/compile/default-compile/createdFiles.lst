@@ -61,4 +61,5 @@ com\example\demo\service\ServicesService.class
 com\example\demo\dto\AuthenticationRequest.class
 com\example\demo\dto\ValidationErrorResponse$ValidationErrorResponseBuilder.class
 com\example\demo\model\Availability.class
+com\example\demo\exception\DuplicateWaitingListException.class
 com\example\demo\controller\BarberController.class

@@ -23,18 +23,18 @@ import java.util.Map;
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
-    
+
     /**
      * Handle ResourceNotFoundException - HTTP 404
      */
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleResourceNotFound(
             ResourceNotFoundException ex, WebRequest request) {
-        
+
         logger.warn("Resource not found: {}", ex.getMessage());
-        
+
         ErrorResponse error = ErrorResponse.builder()
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.NOT_FOUND.value())
@@ -42,19 +42,19 @@ public class GlobalExceptionHandler {
                 .message(ex.getMessage())
                 .path(extractPath(request))
                 .build();
-        
+
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
     }
-    
+
     /**
      * Handle SlotNotAvailableException - HTTP 409
      */
     @ExceptionHandler(SlotNotAvailableException.class)
     public ResponseEntity<ErrorResponse> handleSlotNotAvailable(
             SlotNotAvailableException ex, WebRequest request) {
-        
+
         logger.info("Slot not available: {}", ex.getMessage());
-        
+
         ErrorResponse error = ErrorResponse.builder()
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.CONFLICT.value())
@@ -62,45 +62,45 @@ public class GlobalExceptionHandler {
                 .message(ex.getMessage())
                 .path(extractPath(request))
                 .build();
-        
+
         return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
     }
-    
+
     /**
      * Handle Bean Validation errors - HTTP 400
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ValidationErrorResponse> handleValidationErrors(
             MethodArgumentNotValidException ex, WebRequest request) {
-        
+
         Map<String, String> errors = new HashMap<>();
         ex.getBindingResult().getAllErrors().forEach(error -> {
             String fieldName = ((FieldError) error).getField();
             String errorMessage = error.getDefaultMessage();
             errors.put(fieldName, errorMessage);
         });
-        
+
         logger.warn("Validation failed for {}: {}", extractPath(request), errors);
-        
+
         ValidationErrorResponse response = ValidationErrorResponse.builder()
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.BAD_REQUEST.value())
                 .error("Validation Failed")
                 .validationErrors(errors)
                 .build();
-        
+
         return ResponseEntity.badRequest().body(response);
     }
-    
+
     /**
      * Handle OptimisticLockException (race condition) - HTTP 409
      */
     @ExceptionHandler(OptimisticLockException.class)
     public ResponseEntity<ErrorResponse> handleOptimisticLock(
             OptimisticLockException ex, WebRequest request) {
-        
+
         logger.warn("Optimistic lock exception on {}: {}", extractPath(request), ex.getMessage());
-        
+
         ErrorResponse error = ErrorResponse.builder()
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.CONFLICT.value())
@@ -108,19 +108,39 @@ public class GlobalExceptionHandler {
                 .message("La risorsa è stata modificata da un altro utente. Riprova.")
                 .path(extractPath(request))
                 .build();
-        
+
         return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
     }
-    
+
+    /**
+     * Handle DuplicateWaitingListException - HTTP 400
+     */
+    @ExceptionHandler(DuplicateWaitingListException.class)
+    public ResponseEntity<ErrorResponse> handleDuplicateWaitingList(
+            DuplicateWaitingListException ex, WebRequest request) {
+
+        logger.info("Duplicate waiting list entry attempt: {}", ex.getMessage());
+
+        ErrorResponse error = ErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .error("Bad Request")
+                .message(ex.getMessage())
+                .path(extractPath(request))
+                .build();
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
     /**
      * Handle WaitingListProcessingException - HTTP 500
      */
     @ExceptionHandler(WaitingListProcessingException.class)
     public ResponseEntity<ErrorResponse> handleWaitingListProcessing(
             WaitingListProcessingException ex, WebRequest request) {
-        
+
         logger.error("Waiting list processing failed: {}", ex.getMessage(), ex);
-        
+
         ErrorResponse error = ErrorResponse.builder()
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
@@ -128,19 +148,19 @@ public class GlobalExceptionHandler {
                 .message("Errore nel processamento della lista d'attesa")
                 .path(extractPath(request))
                 .build();
-        
+
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
     }
-    
+
     /**
      * Handle all other exceptions - HTTP 500
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGenericException(
             Exception ex, WebRequest request) {
-        
+
         logger.error("Unexpected error on {}: {}", extractPath(request), ex.getMessage(), ex);
-        
+
         ErrorResponse error = ErrorResponse.builder()
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
@@ -148,10 +168,10 @@ public class GlobalExceptionHandler {
                 .message("Si è verificato un errore imprevisto")
                 .path(extractPath(request))
                 .build();
-        
+
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
     }
-    
+
     /**
      * Extract request path from WebRequest
      */
