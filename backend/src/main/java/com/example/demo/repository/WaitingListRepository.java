@@ -23,4 +23,6 @@ public interface WaitingListRepository extends JpaRepository<WaitingList, Long> 
         boolean existsByCustomerIdAndBarberIdAndServiceIdAndDataRichiestaAndStato(
                         Long customerId, Long barberId, Long serviceId, LocalDate dataRichiesta,
                         WaitingList.StatoListaAttesa stato);
+
+        List<WaitingList> findByDataRichiestaOrderByDataIscrizioneAsc(LocalDate dataRichiesta);
 }

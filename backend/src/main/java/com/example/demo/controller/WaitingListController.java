@@ -25,15 +25,13 @@ public class WaitingListController {
     private WaitingListService waitingListService;
 
     @PostMapping
-    @Operation(summary = "Aggiungi alla lista d'attesa",
-               description = "Aggiunge un cliente alla lista d'attesa per un servizio specifico")
+    @Operation(summary = "Aggiungi alla lista d'attesa", description = "Aggiunge un cliente alla lista d'attesa per un servizio specifico")
     public ResponseEntity<WaitingList> addToWaitingList(@Valid @RequestBody WaitingListRequest request) {
         return ResponseEntity.ok(waitingListService.addToWaitingList(request));
     }
 
     @GetMapping("/customer/{customerId}")
-    @Operation(summary = "Lista d'attesa per cliente",
-               description = "Restituisce tutte le voci in lista d'attesa per un cliente")
+    @Operation(summary = "Lista d'attesa per cliente", description = "Restituisce tutte le voci in lista d'attesa per un cliente")
     public List<WaitingList> getWaitingListByCustomer(@PathVariable Long customerId) {
         return waitingListService.getWaitingListByCustomer(customerId);
     }
@@ -58,5 +56,12 @@ public class WaitingListController {
     public ResponseEntity<Void> cancelWaitingListEntry(@PathVariable Long id) {
         waitingListService.cancelWaitingListEntry(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/by-date")
+    @Operation(summary = "Lista d'attesa per data", description = "Restituisce tutte le voci in lista d'attesa per una data specifica")
+    public ResponseEntity<List<WaitingList>> getWaitingListByDate(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        return ResponseEntity.ok(waitingListService.getWaitingListByDate(date));
     }
 }

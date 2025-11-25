@@ -12,7 +12,9 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { BehaviorSubject, Observable, combineLatest, of } from 'rxjs';
 import { catchError, map, switchMap, tap } from 'rxjs/operators';
 
-type AdminSection = 'services' | 'barbers' | 'agenda' | 'settings';
+import { BarberAdminService } from '../../services/barber-admin.service';
+
+type AdminSection = 'services' | 'barbers' | 'agenda' | 'settings' | 'waitingList';
 
 type CalendarDay = {
   date: Date;
@@ -31,6 +33,7 @@ type CalendarDay = {
 })
 export class AdminDashboardComponent implements OnInit {
   private apiService = inject(ApiService);
+  private barberAdminService = inject(BarberAdminService);
   private authService = inject(AuthService);
   private router = inject(Router);
 
@@ -39,6 +42,11 @@ export class AdminDashboardComponent implements OnInit {
   private refreshBarbers$ = new BehaviorSubject<void>(undefined);
   private refreshBusinessHours$ = new BehaviorSubject<void>(undefined);
   private selectedDate$ = new BehaviorSubject<string>('');
+
+  // Waiting List State
+  private selectedWaitingListDate$ = new BehaviorSubject<string>('');
+  waitingListServiceFilter: number | null = null;
+  waitingListStatusFilter: 'ALL' | 'IN_ATTESA' | 'CONFERMATO' | 'ANNULLATO' = 'ALL';
 
   // Observables for template
   services$: Observable<Service[]> = this.refreshServices$.pipe(
@@ -95,6 +103,21 @@ export class AdminDashboardComponent implements OnInit {
     })
   );
 
+  waitingList$: Observable<any[]> = combineLatest([
+    this.selectedWaitingListDate$,
+    this.services$ // We need services to filter by service if needed, but mainly to trigger updates if services change? No, just for the dropdown.
+  ]).pipe(
+    switchMap(([date]) => {
+      if (!date) return of([]);
+      return this.barberAdminService.getWaitingListByDate(date).pipe(
+        catchError((error) => {
+          console.error('Errore caricamento lista attesa:', error);
+          return of([]);
+        })
+      );
+    })
+  );
+
   selectedSection: AdminSection = 'agenda';
 
   // Calendar State
@@ -102,6 +125,13 @@ export class AdminDashboardComponent implements OnInit {
   calendarWeekdays = ['Lu', 'Ma', 'Me', 'Gi', 'Ve', 'Sa', 'Do'];
   calendarMonthLabel = '';
   private calendarReference: Date = new Date();
+
+  // Waiting List Calendar State (can reuse logic but need separate state if we want independent calendars)
+  // For simplicity, let's reuse the logic but store the selected date separately.
+  // We might need a separate calendar instance if we want to navigate months independently.
+  // Let's assume we use the same calendar logic but applied to a different view.
+  // Actually, to avoid conflict, let's duplicate the calendar state for waiting list or just reset it when switching tabs.
+  // Resetting when switching tabs is easier.
 
   // Forms State
   newService: Partial<Service> = { nome: '', durata: 0, prezzo: 0, descrizione: '' };
@@ -129,10 +159,16 @@ export class AdminDashboardComponent implements OnInit {
       return;
     }
     this.initializeAgenda();
+    this.initializeWaitingList();
   }
 
   setSection(section: AdminSection): void {
     this.selectedSection = section;
+    if (section === 'agenda') {
+      this.updateCalendar(this.parseInputDate(this.selectedDate) || new Date());
+    } else if (section === 'waitingList') {
+      this.updateCalendar(this.parseInputDate(this.selectedWaitingListDate) || new Date());
+    }
   }
 
   // --- Agenda Logic ---
@@ -165,8 +201,51 @@ export class AdminDashboardComponent implements OnInit {
     this.updateCalendar(today);
   }
 
+  // --- Waiting List Logic ---
+
+  private initializeWaitingList(): void {
+    const today = new Date();
+    this.selectedWaitingListDate = this.formatDateForInput(today);
+  }
+
+  get selectedWaitingListDate(): string {
+    return this.selectedWaitingListDate$.value;
+  }
+
+  set selectedWaitingListDate(value: string) {
+    this.selectedWaitingListDate$.next(value);
+  }
+
+  onWaitingListDateChange(): void {
+    this.updateCalendar();
+  }
+
+  setTodayWaitingList(): void {
+    const today = new Date();
+    this.selectedWaitingListDate = this.formatDateForInput(today);
+    this.updateCalendar(today);
+  }
+
+  getFilteredWaitingList(list: any[]): any[] {
+    return list.filter(item => {
+      const matchesService = this.waitingListServiceFilter ? item.service.id === this.waitingListServiceFilter : true;
+      const matchesStatus = this.waitingListStatusFilter === 'ALL' ? true : item.stato === this.waitingListStatusFilter;
+      return matchesService && matchesStatus;
+    });
+  }
+
+  setWaitingListStatusFilter(status: 'ALL' | 'IN_ATTESA' | 'CONFERMATO' | 'ANNULLATO'): void {
+    this.waitingListStatusFilter = status;
+  }
+
+  // --- Calendar Logic (Shared) ---
+
   selectCalendarDay(day: CalendarDay): void {
-    this.selectedDate = this.formatDateForInput(day.date);
+    if (this.selectedSection === 'agenda') {
+      this.selectedDate = this.formatDateForInput(day.date);
+    } else if (this.selectedSection === 'waitingList') {
+      this.selectedWaitingListDate = this.formatDateForInput(day.date);
+    }
     this.updateCalendar(day.date);
   }
 
@@ -187,9 +266,11 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   private updateCalendar(reference?: Date): void {
-    const base = reference ?? this.parseInputDate(this.selectedDate) ?? new Date();
+    let selectedDateStr = this.selectedSection === 'waitingList' ? this.selectedWaitingListDate : this.selectedDate;
+
+    const base = reference ?? this.parseInputDate(selectedDateStr) ?? new Date();
     const startOfMonth = new Date(base.getFullYear(), base.getMonth(), 1);
-    const selected = this.parseInputDate(this.selectedDate);
+    const selected = this.parseInputDate(selectedDateStr);
     const today = new Date();
 
     const startOffset = (startOfMonth.getDay() + 6) % 7;

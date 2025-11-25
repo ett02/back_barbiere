@@ -161,4 +161,14 @@ public class WaitingListService {
 
         return null;
     }
+
+    /**
+     * Gets the waiting list for a specific date.
+     *
+     * @param date the date
+     * @return the list of waiting list entries
+     */
+    public List<WaitingList> getWaitingListByDate(LocalDate date) {
+        return waitingListRepository.findByDataRichiestaOrderByDataIscrizioneAsc(date);
+    }
 }
